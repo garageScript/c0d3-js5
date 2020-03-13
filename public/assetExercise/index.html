@@ -1,0 +1,109 @@
+<style type="text/css" media="screen">
+.filelist { 
+	position: absolute;
+	top: 50px;
+	left: 0;
+	bottom: 0;
+	width: 300px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.filecontainer {
+  display: flex;
+  justify-content: space-between;
+}
+.file__open {
+  color: #9fa;
+  font-size: 25px;
+  padding: 0px;
+  margin: 0px;
+  cursor:pointer;
+}
+#editor { 
+	position: absolute;
+	top: 50px;
+	right: 0;
+	bottom: 0;
+	left: 300px;
+}
+.filename__input {
+  height: 40px;
+  width: 100%;
+  font-size: 15px;
+}
+.file__create-button {
+  width: 200px;
+  font-size: 15px;
+}
+.container {
+  display: flex;
+}
+.file {
+  cursor: pointer;
+}
+</style>
+
+<div class="container">
+<input class="filename__input" type="text" placeholder="File Name">
+<button class="file__create-button">Create File</button>
+</div>
+
+<div id="editor"></div>
+<div class="filelist"></div>
+
+<script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+const editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+
+const fnameElement = document.querySelector('.filename__input')
+const createButton = document.querySelector('.file__create-button')
+const filelist = document.querySelector('.filelist')
+createButton.addEventListener('click', (e) => {
+  console.log('clicked')
+	const name = fnameElement.value
+	const content = editor.getValue()
+  fetch('/assetExercise/api/files', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      name, content
+    })
+  }).then( () => {
+    window.location.reload()
+  })
+})
+
+const File = function(name) {
+  const element = document.createElement('div')
+  element.innerHTML = `
+  <div class="filecontainer">
+    <p class="file">${name}</p>
+    <p class="file__open">&#129488</p>
+  </div>
+  `
+  filelist.append(element)
+  element.querySelector('.file').addEventListener('click', () => {
+    fnameElement.value = name
+    fetch(`/assetExercise/api/files/${name}`).then(r => r.json()).then(data => {
+      editor.setValue(data.content)
+    })
+  })
+  const openButton = element.querySelector('.file__open')
+  openButton.addEventListener('mousemove', () => {
+    openButton.innerHTML = '&#129321'
+  })
+  openButton.addEventListener('mouseout', () => {
+    openButton.innerHTML = '&#129488'
+  })
+  openButton.addEventListener('click', () => {
+    window.open(`/assetExercise/${name}`);
+  })
+}
+
+fetch('/assetExercise/api/files').then(r => r.json()).then(data => {
+  data.forEach(d => new File(d))
+})
+</script>

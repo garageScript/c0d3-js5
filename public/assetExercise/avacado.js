@@ -1,0 +1,1 @@
+console.log('Avacado's number 6E23');
