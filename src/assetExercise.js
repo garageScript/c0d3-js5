@@ -1,8 +1,17 @@
 const express = require('express')
 const fs = require('fs')
 const path = require('path')
+const multer = require('multer')
+
 const router = express.Router()
-console.log('', __dirname)
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, `../public/assetExercise/`),
+  filename: function (_, file, cb) {
+    cb(null, `${file.originalname.replace(/ /g, '-')}`)
+  }
+})
+const upload = multer({storage})
 
 // define the home page route
 router.get('/', function (req, res) {
@@ -12,6 +21,16 @@ router.get('/', function (req, res) {
 router.post('/api/files', function (req, res) {
   fs.writeFile(path.join(__dirname, `../public/assetExercise/${req.body.name}`), req.body.content, () => {})
   res.json(req.body)
+})
+
+router.post('/api/assets', upload.any('assets'), function (req, res) {
+  const fileListResponse = req.files.map( f => {
+    return {
+      name: f.filename,
+    }
+  })
+
+  res.json(fileListResponse)
 })
 
 router.get('/api/files', function (req, res) {

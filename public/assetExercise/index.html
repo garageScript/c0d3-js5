@@ -41,6 +41,23 @@
 .file {
   cursor: pointer;
 }
+#dropZone {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  display: none;
+  border: 8px rgba(100,100,100) dotted;
+  background-color: rgba(105, 255, 105, 0.9);
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  color: rgba(100,100,100);
+}
+#dropZone.focused {
+  display: flex;
+}
 </style>
 
 <div class="container">
@@ -50,6 +67,9 @@
 
 <div id="editor"></div>
 <div class="filelist"></div>
+<div id="dropZone">
+  <h1 id="dropZone__title"></h1>
+</div>
 
 <script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
@@ -106,4 +126,48 @@ const File = function(name) {
 fetch('/assetExercise/api/files').then(r => r.json()).then(data => {
   data.forEach(d => new File(d))
 })
+
+/* Dropzone stuff */
+
+const dropZone = document.querySelector('#dropZone')
+const dropZoneTitle = document.querySelector('#dropZone__title')
+
+const createDropEvent = (clear=true) => {
+	return (e) => {
+		if (clear) {
+			dropZone.classList.remove('focused')
+		} else {
+			dropZone.classList.add('focused')
+			dropZoneTitle.innerText = `Uploading ${e.dataTransfer.items.length} files`
+		}
+		e.preventDefault()
+		e.stopPropagation()
+		return false
+	}
+}
+
+const clearDropEvent = createDropEvent(true)
+
+document.body.addEventListener('dragenter', createDropEvent(false))
+document.body.addEventListener('dragover', createDropEvent(false))
+document.body.addEventListener('dragleave', clearDropEvent)
+document.body.addEventListener('drop', (e) => {
+	const files = e.target.files || e.dataTransfer.files
+	if (!files.length) {
+		return
+	}
+
+	const formData = new FormData()
+	for(let i = 0; i < files.length; i ++) {
+		formData.append('assets[]', files[i], files[i].name)
+	}
+	fetch('/assetExercise/api/assets', {
+		method: 'POST',
+		body: formData
+	}).then( r => r.json() ).then(arr => {
+		window.location.reload()
+	})
+	return clearDropEvent(e)
+})
+
 </script>
