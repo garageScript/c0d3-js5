@@ -47,8 +47,8 @@ router.use('*', async (req, res, next) => {
 })
 
 const getCityCards = () => {
-  const sortedCityMappings = Object.entries(cityToIpMappings).sort((city1, city2) => {
-    return Object.keys(city1[1]) - Object.keys(city2[1])
+  const sortedCityMappings = Object.entries(cityToIpMappings).sort((ipCity1, ipCity2) => {
+    return Object.keys(ipCity2[1]).length - Object.keys(ipCity1[1]).length
   })
   return sortedCityMappings.reduce((acc, [cityname, cityInfo]) => {
     const count = Object.values(cityInfo).reduce((acc, city) => {
@@ -100,9 +100,9 @@ const getHtml = (ll, cityStr, user = {}) => {
 
   return `
   <h1>You are visiting from ${user.cityStr}</h1>
-<div id="googleMap" style="width:100%;height:600px;"></div>
+<div id="googleMap" style="width:100%;height:500px;"></div>
 <h1>The cities our visitors come from</h1>
-<div>${cityCards}</div>
+<div style="max-height: 300px; overflow: auto;">${cityCards}</div>
 
 <hr />
 <h2>API Access</h2>
