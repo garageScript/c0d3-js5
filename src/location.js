@@ -58,6 +58,10 @@ router.get('/city/:cityName', (req, res) => {
   res.send(html)
 })
 
+router.get('/api/ip', (req, res) => {
+  res.json(req.user)
+})
+
 const getHtml = (ll, cityStr, user = {}) => {
   const cityCards = getCityCards()
 
