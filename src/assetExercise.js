@@ -40,10 +40,11 @@ router.get('/api/files', function (req, res) {
 })
 
 router.get('/api/files/:name', function (req, res) {
-  fs.readFile(path.join(__dirname, `../public/assetExercise/${req.params.name}`), (err, content) => {
+  fs.readFile(path.join(__dirname, `../public/assetExercise/${req.params.name}`), (err, fileContent) => {
+    const content = (fileContent && fileContent.toString()) || ''
     res.json({
       name: req.params.name,
-      content: content.toString()
+      content
     })
   })
 })
