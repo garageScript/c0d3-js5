@@ -15,18 +15,29 @@ const getIp = (req) => {
   return ipv4
 }
 
-router.use('*', async (req, res, next) => {
-  const ip = getIp(req)
+const getGeoFromIp = (ip) => {
   const location = geoip.lookup(ip)
   if (!location) {
-    return res.send('No ip available')
+    return null
   }
 
   const city = location.city ? location.city + ', ' : ''
   const region = location.region ? location.region + ', ' : ''
   const cityStr = `${city} ${region} ${location.country}`
+  return { ...location, ip, cityStr }
+}
+
+router.use('*', async (req, res, next) => {
+  const ip = getIp(req)
+  const location = getGeoFromIp(ip)
+
+  if (!location) {
+    return res.send('No ip available')
+  }
+
+  const cityStr = location.cityStr
   const cityInfo = cityToIpMappings[cityStr] || {}
-  cityInfo[ip] = cityInfo[ip] || { ...location, ip, cityStr, count: 0 }
+  cityInfo[ip] = cityInfo[ip] || { ...location, count: 0 }
   cityInfo[ip].count += 1
   req.user = cityInfo[ip]
   cityInfo[ip] = req.user
@@ -59,7 +70,18 @@ router.get('/city/:cityName', (req, res) => {
 })
 
 router.get('/api/ip', (req, res) => {
-  res.json(req.user)
+  return res.json(req.user)
+})
+
+router.get('/api/ip/:ip', (req, res) => {
+  const location = getGeoFromIp(req.params.ip)
+  if (!location) {
+    return res.json({
+      error: 'Not found. Please file an issue at github.com/garagescript. Requestor IP address returned instead',
+      ...req.user
+    })
+  }
+  return res.json(location)
 })
 
 const getHtml = (ll, cityStr, user = {}) => {
@@ -81,6 +103,16 @@ const getHtml = (ll, cityStr, user = {}) => {
 <div id="googleMap" style="width:100%;height:600px;"></div>
 <h1>The cities our visitors come from</h1>
 <div>${cityCards}</div>
+
+<hr />
+<h2>API Access</h2>
+<h3>
+  <a href="/location/api/ip">https://js5.c0d3.com/location/api/ip</a> - To retrieve your IP information
+</h3>
+
+<h3>
+  <a href="/location/api/ip/206.189.152.211">https://js5.c0d3.com/location/api/ip/&lt;Replace with an IP address you want to look up&gt;</a> - To retrieve information about a specific IP address
+</h3>
 
 <script>
   function myMap() {
