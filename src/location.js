@@ -137,6 +137,10 @@ Data source (IP - Geolocation) is provided by <a href="https://www.maxmind.com/e
 <p>
 We set up the API for you (above) to use freely so you don't have to setup the data yourself (takes alot of memory).
 </p>
+
+<p>
+To get the incoming request IP address, <a href="https://stackoverflow.com/questions/10849687/express-js-how-to-get-remote-client-address">this stackoverflow</a> shows you how using node and express.
+</p>
 <hr />
 
 <h1 style="margin-bottom: 30px;">The End</h1>
