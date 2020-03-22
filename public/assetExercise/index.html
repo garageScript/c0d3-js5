@@ -72,6 +72,7 @@
 </div>
 
 <script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
 <script>
 function findGetParameter(parameterName) {
   var result = null,
@@ -115,6 +116,8 @@ if (initialFileName) {
     editor.setValue(data.content)
   })
   fnameElement.value = initialFileName
+  const modelist = ace.require("ace/ext/modelist")
+  editor.session.setMode( modelist.getModeForPath(initialFileName).mode )
 }
 
 const File = function(name) {
