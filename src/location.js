@@ -114,6 +114,23 @@ const getHtml = (ll, cityStr, user = {}) => {
   <a href="/location/api/ip/206.189.152.211">https://js5.c0d3.com/location/api/ip/&lt;Replace with an IP address you want to look up&gt;</a> - To retrieve information about a specific IP address
 </h3>
 
+<hr />
+<h2>INFO</h2>
+<p>
+IP Address from incoming IP address <a href="https://serverfault.com/questions/381393/can-the-ip-address-for-an-http-request-be-spoofed">cannot be spoofed</a> or made up.
+</p>
+
+<p>
+Your IP address is provided by your Internet Provider, so police can easily track you down if you do illegal activities online.
+</p>
+
+<p>
+To protect your privacy and hide your IP address, you can use a VPN service. If a request is through a VPN, server will only see the VPN's IP address.
+</p>
+
+<hr />
+<h1>The End</h1>
+
 <script>
   function myMap() {
     var mapProp= {
