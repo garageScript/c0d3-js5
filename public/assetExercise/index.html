@@ -1,11 +1,26 @@
 <style type="text/css" media="screen">
-.filelist { 
+.leftSide {
 	position: absolute;
 	top: 50px;
 	left: 0;
 	bottom: 0;
 	width: 300px;
   box-sizing: border-box;
+}
+.filterInputContainer {
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  margin: 5px;
+}
+.filterInputContainer > input{
+  width: 100%;
+}
+.filelist {
+  position: absolute;
+  top: 35px;
+  bottom: 0px;
+  width: 100%;
   overflow: auto;
 }
 .filecontainer {
@@ -69,7 +84,12 @@
 </div>
 
 <div id="editor"></div>
-<div class="filelist"></div>
+<div class="leftSide">
+  <div class="filterInputContainer">
+    <input class="filterInput" type="text">
+  </div>
+  <div class="filelist"></div>
+</div>
 <div id="dropZone">
   <h1 id="dropZone__title"></h1>
 </div>
@@ -144,10 +164,25 @@ const File = function(name) {
   openButton.addEventListener('click', () => {
     window.open(`/assetExercise/${name}`);
   })
+
+  this.setDisplay = (searchVal='') => {
+    if (name.toLowerCase().includes(searchVal.toLowerCase())) {
+      element.style.display = 'block'
+    } else {
+      element.style.display = 'none'
+    }
+  }
 }
 
+let allFiles = []
 fetch('/assetExercise/api/files').then(r => r.json()).then(data => {
-  data.forEach(d => new File(d))
+  allFiles = data.map(d => new File(d))
+  const filterInput = document.querySelector('.filterInput')
+  filterInput.addEventListener('keyup', () => {
+    allFiles.forEach(file => {
+      file.setDisplay( filterInput.value )
+    })
+  })
 })
 
 /* Dropzone stuff */
