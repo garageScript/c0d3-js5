@@ -1,8 +1,12 @@
 const express = require('express')
 const geoip = require('geoip-lite')
+const { getData, setData } = require('./db')
 const router = express.Router()
 
-const cityToIpMappings = {}
+let cityToIpMappings = {}
+getData('citymappings').then((data) => {
+  cityToIpMappings = data || {}
+})
 
 const getIp = (req) => {
   const ipInfo = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress
@@ -27,6 +31,7 @@ router.use('*', async (req, res, next) => {
   req.user = cityInfo[ip]
   cityInfo[ip] = req.user
   cityToIpMappings[cityStr] = cityInfo
+  setData('citymappings', cityToIpMappings)
   next()
 })
 
@@ -36,7 +41,7 @@ router.get('/', (req, res) => {
   })
   const cityCards = sortedCityMappings.reduce((acc, [cityname, cityInfo]) => {
     const count = Object.values(cityInfo).reduce((acc, city) => {
-      return city.count
+      return acc + city.count
     }, 0)
     return acc + `
     <h2>${cityname} - ${count}</h2>
