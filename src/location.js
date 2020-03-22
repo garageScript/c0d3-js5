@@ -35,20 +35,33 @@ router.use('*', async (req, res, next) => {
   next()
 })
 
-router.get('/', (req, res) => {
+const getCityCards = () => {
   const sortedCityMappings = Object.entries(cityToIpMappings).sort((city1, city2) => {
     return Object.keys(city1[1]) - Object.keys(city2[1])
   })
-  const cityCards = sortedCityMappings.reduce((acc, [cityname, cityInfo]) => {
+  return sortedCityMappings.reduce((acc, [cityname, cityInfo]) => {
     const count = Object.values(cityInfo).reduce((acc, city) => {
       return acc + city.count
     }, 0)
     return acc + `
+    <a href="/location/city/${cityname}"> 
     <h2>${cityname} - ${count}</h2>
+    </a>
     `
   }, '')
+}
 
-  const ipMappings = cityToIpMappings[req.user.cityStr]
+router.get('/city/:cityName', (req, res) => {
+  const ipMappings = cityToIpMappings[req.params.cityName]
+  const firstEntry = Object.values(ipMappings)[0]
+  const html = getHtml(firstEntry.ll, firstEntry.cityStr)
+  res.send(html)
+})
+
+const getHtml = (ll, cityStr) => {
+  const cityCards = getCityCards()
+
+  const ipMappings = cityToIpMappings[cityStr]
   const ipMarkers = Object.values(ipMappings).reduce((acc, location) => {
     return acc + `
   new google.maps.Marker({
@@ -59,14 +72,14 @@ router.get('/', (req, res) => {
     `
   }, '')
 
-  const html = `
+  return `
 <div id="googleMap" style="width:100%;height:600px;"></div>
 <div>${cityCards}</div>
 
 <script>
   function myMap() {
     var mapProp= {
-      center:new google.maps.LatLng(${req.user.ll[0]},${req.user.ll[1]}),
+      center:new google.maps.LatLng(${ll[0]},${ll[1]}),
         zoom:11,
     };
     var map = new google.maps.Map(document.getElementById("googleMap"),mapProp);
@@ -76,6 +89,10 @@ router.get('/', (req, res) => {
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB29pGpCzE_JGIEMLu1SGIqwoIbc0sHFHo&callback=myMap"></script>
   `
+}
+
+router.get('/', (req, res) => {
+  const html = getHtml(req.user.ll, req.user.cityStr)
   res.send(html)
 })
 
