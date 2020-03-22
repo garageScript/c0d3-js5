@@ -3,6 +3,12 @@ const geoip = require('geoip-lite')
 const { getData, setData } = require('./db')
 const router = express.Router()
 
+/* INFORMATION
+ * This API is powered by MaxMind. 
+ * Account email: song - zheng - club
+  *     key
+  *         FUOqXuHii0oRYlQB
+*/
 let cityToIpMappings = {}
 getData('citymappings').then((data) => {
   cityToIpMappings = data || {}
