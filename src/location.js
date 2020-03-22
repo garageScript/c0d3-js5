@@ -54,11 +54,11 @@ const getCityCards = () => {
 router.get('/city/:cityName', (req, res) => {
   const ipMappings = cityToIpMappings[req.params.cityName]
   const firstEntry = Object.values(ipMappings)[0]
-  const html = getHtml(firstEntry.ll, firstEntry.cityStr)
+  const html = getHtml(firstEntry.ll, firstEntry.cityStr, req.user)
   res.send(html)
 })
 
-const getHtml = (ll, cityStr) => {
+const getHtml = (ll, cityStr, user = {}) => {
   const cityCards = getCityCards()
 
   const ipMappings = cityToIpMappings[cityStr]
@@ -73,7 +73,9 @@ const getHtml = (ll, cityStr) => {
   }, '')
 
   return `
+  <h1>You are visiting from ${user.cityStr}</h1>
 <div id="googleMap" style="width:100%;height:600px;"></div>
+<h1>The cities our visitors come from</h1>
 <div>${cityCards}</div>
 
 <script>
@@ -92,7 +94,7 @@ const getHtml = (ll, cityStr) => {
 }
 
 router.get('/', (req, res) => {
-  const html = getHtml(req.user.ll, req.user.cityStr)
+  const html = getHtml(req.user.ll, req.user.cityStr, req.user)
   res.send(html)
 })
 
