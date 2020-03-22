@@ -129,7 +129,17 @@ To protect your privacy and hide your IP address, you can use a VPN service. If 
 </p>
 
 <hr />
-<h1>The End</h1>
+<h2>Documentation</h2>
+<p>
+Data source (IP - Geolocation) is provided by <a href="https://www.maxmind.com/en/home">MaxMind</a> using <a href="https://github.com/maxmind/GeoIP2-node">this node module</a>.
+</p>
+
+<p>
+We set up the API for you (above) to use freely so you don't have to setup the data yourself (takes alot of memory).
+</p>
+<hr />
+
+<h1 style="margin-bottom: 30px;">The End</h1>
 
 <script>
   function myMap() {
