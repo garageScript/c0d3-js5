@@ -172,6 +172,13 @@ Auth.logout().then( user => {
 }).then(console.log)
   </pre>
 
+  <hr />
+  <h1>Server</h1>
+  <h3>Auth Functions</h3>
+  <p>Server should power all of the above functions using sessions</p>
+
+  <h3>JWT Tokens</h3>
+  <p>Allow authentication via JWT tokens</p>
 <script>
 Auth.getSession().then(console.log)
 </script>
