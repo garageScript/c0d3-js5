@@ -1,9 +1,12 @@
 const express = require('express')
+const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const session = require('express-session')
 const { uuid } = require('uuidv4')
 const { getData, setData } = require('./db')
 const router = express.Router()
+
+const privateSecret = 'reallygreatc0der'
 
 // For CORS. Must be placed at the top so this handles
 // cors request first before propagating to other middlewares
@@ -47,6 +50,14 @@ router.use('/*', (req, res, next) => {
   if (req.session.username) {
     req.user = usernameList[req.session.username]
   }
+  const authToken = (req.headers.authorization || '').split(' ')
+  if (authToken) {
+    const data = jwt.decode(authToken.pop())
+    if (data.username) {
+      req.user = usernameList[data.username]
+    }
+  }
+
   const sendJson = res.json.bind(res)
   res.json = (...args) => {
     const newData = { ...args[0] }
@@ -85,6 +96,7 @@ router.post('/api/users', (req, res) => {
     }
     userInfo.password = hash
     saveUser(userInfo)
+    userInfo.jwt = jwt.sign({ username: userInfo.username }, privateSecret)
     res.json(userInfo)
   })
 })
@@ -111,6 +123,7 @@ router.post('/api/session', (req, res) => {
       return res.errJSON('Wrong credentials')
     }
     req.session.username = identity.username
+    identity.jwt = jwt.sign({ username: identity.username }, privateSecret)
     return res.json(identity)
   })
 })
