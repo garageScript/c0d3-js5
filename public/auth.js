@@ -16,4 +16,14 @@ const authContainer = (type) => {
 }
 Auth.login = authContainer('session')
 Auth.signup = authContainer('users')
+Auth.getSession = () => {
+  return fetch('/auth/api/session', {
+    credentials: 'include'
+  }).then(r => r.json())
+}
+Auth.logout = () => {
+  return fetch('/auth/api/logout', {
+    credentials: 'include'
+  }).then(r => r.json())
+}
 window.Auth = Auth

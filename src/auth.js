@@ -1,8 +1,13 @@
 const express = require('express')
 const bcrypt = require('bcrypt')
+const session = require('express-session')
 const { uuid } = require('uuidv4')
 const { getData, setData } = require('./db')
 const router = express.Router()
+
+router.use(session({
+  secret: 'keyboard cat'
+}))
 
 const SALT_ROUNDS = 10
 
@@ -16,6 +21,9 @@ getData('userList').then((data) => {
 })
 
 router.use('/*', (req, res, next) => {
+  if (req.session.username) {
+    req.user = usernameList[req.session.username]
+  }
   const sendJson = res.json.bind(res)
   res.json = (...args) => {
     delete args[0].password
@@ -56,6 +64,13 @@ router.post('/api/users', (req, res) => {
   })
 })
 
+router.get('/api/session', (req, res) => {
+  if (!req.user) {
+    return res.errJSON('Not logged in')
+  }
+  return res.json(req.user)
+})
+
 router.post('/api/session', (req, res) => {
   const userInfo = { ...req.body }
   const identity = usernameList[userInfo.username]
@@ -70,8 +85,14 @@ router.post('/api/session', (req, res) => {
     if (!result) {
       return res.errJSON('Wrong credentials')
     }
+    req.session.username = identity.username
     return res.json(identity)
   })
+})
+
+router.get('/api/logout', (req, res) => {
+  req.session.username = ''
+  res.json({})
 })
 
 router.get('/', (req, res) => {
@@ -110,11 +131,24 @@ Auth.login({
   password: 'helpless',
 })
   </pre>
-<script>
-Auth.login({
-  username: 'songz',
-  password: 'helpless',
+
+<h3>Session Function</h3>
+  <pre>
+Auth.getSession().then( user => {
+  console.log('User is', user)
 })
+  </pre>
+
+<h3>Logout Function</h3>
+  <pre>
+// Logout, then get session should be empty
+Auth.logout().then( user => {
+  return Auth.getSession()
+}).then(console.log)
+  </pre>
+
+<script>
+Auth.getSession().then(console.log)
 </script>
   `)
 })
