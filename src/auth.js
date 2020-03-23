@@ -5,8 +5,31 @@ const { uuid } = require('uuidv4')
 const { getData, setData } = require('./db')
 const router = express.Router()
 
+// For CORS. Must be placed at the top so this handles
+// cors request first before propagating to other middlewares
+// Credentials - https://stackoverflow.com/questions/24687313/what-exactly-does-the-access-control-allow-credentials-header-do
+router.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true)
+  res.header('Access-Control-Allow-Origin', req.headers.origin)
+  res.header('Access-Control-Allow-Methods', 'GET', 'PUT, POST') // cors preflight
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Credentials'
+  )
+  next()
+})
+
+// DOCS about session
+// resave:
+//     If your store sets an expiration date on stored sessions, then you likely need resave: true.
+// saveUninitialized:
+//     Choosing false is useful for implementing login sessions,
+//     reducing server storage usage,
+//     or complying with laws that require permission before setting a cookie.
 router.use(session({
-  secret: 'keyboard cat'
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: false
 }))
 
 const SALT_ROUNDS = 10
@@ -26,7 +49,9 @@ router.use('/*', (req, res, next) => {
   }
   const sendJson = res.json.bind(res)
   res.json = (...args) => {
-    delete args[0].password
+    const newData = { ...args[0] }
+    delete newData.password
+    args[0] = newData
     sendJson(...args)
   }
   res.errJSON = (message) => {
