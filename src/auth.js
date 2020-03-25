@@ -52,7 +52,7 @@ router.use('/*', (req, res, next) => {
   }
   const authToken = (req.headers.authorization || '').split(' ')
   if (authToken) {
-    const data = jwt.decode(authToken.pop())
+    const data = jwt.decode(authToken.pop()) || {}
     if (data.username) {
       req.user = usernameList[data.username]
     }

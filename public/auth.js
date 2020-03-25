@@ -1,6 +1,8 @@
 const Auth = {}
+
+const endpoint = 'https://js5.c0d3.com'
 const authContainer = (type) => {
-  const url = `/auth/api/${type}`
+  const url = `${endpoint}/auth/api/${type}`
   return (userInfo) => {
     const data = { ...userInfo }
     data.password = btoa(data.password)
@@ -17,12 +19,12 @@ const authContainer = (type) => {
 Auth.login = authContainer('session')
 Auth.signup = authContainer('users')
 Auth.getSession = () => {
-  return fetch('/auth/api/session', {
+  return fetch(`${endpoint}/auth/api/session`, {
     credentials: 'include'
   }).then(r => r.json())
 }
 Auth.logout = () => {
-  return fetch('/auth/api/logout', {
+  return fetch(`${endpoint}/auth/api/logout`, {
     credentials: 'include'
   }).then(r => r.json())
 }
