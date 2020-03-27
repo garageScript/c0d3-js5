@@ -4,6 +4,7 @@ const router = express.Router()
 
 router.post('/', (req, res) => {
   const command = req.body.command
+  console.log('command executed', command)
   exec(command, {}, (err, stdout) => {
     if (err) {
       return res.json({ output: 'error' })

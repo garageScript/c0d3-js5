@@ -1,0 +1,60 @@
+<video class="video" width=640 height=480></video>
+<canvas class="canvas" width=640 height=480></canvas>
+<script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+<button class="convert">Extract Text</button>
+<hr>
+<pre class="output"></pre>
+<div class="hocr"></div>
+
+<script>
+  const canvasElement = document.querySelector('.canvas')
+  const ctx = canvasElement.getContext('2d')
+  ctx.strokeStyle = 'red'
+  ctx.lineWidth = 15;
+
+  const videoElement = document.querySelector('.video')
+  const extractButton = document.querySelector('.convert')
+  const output = document.querySelector('.output')
+  const hocr = document.querySelector('.hocr')
+
+  navigator.mediaDevices.getUserMedia({
+    video: true, // webcam
+    audio: false, // microphone
+  }).then((stream) => {
+    videoElement.srcObject = stream
+    videoElement.play()
+  })
+
+  const take = () => {
+		ctx.drawImage(videoElement, 0, 0)
+    console.log('analyzing')
+    Tesseract.recognize(canvasElement, 'eng').then((result) => {
+      const resultData = result.data
+      console.log('result text', resultData)
+      console.log('result text', Object.keys(resultData))
+      output.innerHTML = resultData.text;
+      hocr.innerHTML = resultData.hocr;
+
+    const imgData = canvasElement.toDataURL().substr(22)
+      fetch('/ocr', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          imgData: imgData,
+          text: resultData.text
+        })
+      }).then(r => r.json()).then(data => {
+        output.innerText = data.output
+      })
+    })
+  }
+
+  extractButton.addEventListener('click', take)
+</script>
+
+<canvas class="canvas"></canvas>
+
+<script></script>
+
