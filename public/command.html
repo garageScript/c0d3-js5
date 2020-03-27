@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body>
+  <h1>Commands</h1>
+  <input class="commandInput" type="text">
+  <hr>
+  <pre class="output"></pre>
+  <script>
+const commandInput = document.querySelector('.commandInput')
+const output = document.querySelector('.output')
+commandInput.focus()
+const sendCommand = () => {
+  const value = commandInput.value
+  if (!value) {
+    return
+  }
+  fetch('/commands', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      command: value
+    })
+  }).then(r => r.json()).then(data => {
+    output.innerText = data.output
+  })
+}
+	commandInput.addEventListener('keyup', (e) => {
+		if (e.key === 'Enter') {
+      sendCommand()
+		}
+	})
+  </script>
+</body>
+</html>

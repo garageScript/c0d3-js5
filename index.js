@@ -1,6 +1,7 @@
 const express = require('express')
 const locationRoute = require('./src/location')
 const authRoute = require('./src/auth')
+const commandRoute = require('./src/command')
 const app = express()
 const assetExercise = require('./src/assetExercise')
 
@@ -11,5 +12,6 @@ app.use(express.json())
 app.use('/assetExercise', assetExercise)
 app.use('/location', locationRoute)
 app.use('/auth', authRoute)
+app.use('/commands', commandRoute)
 
 app.listen(process.env.PORT || 3020)
