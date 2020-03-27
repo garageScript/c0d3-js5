@@ -32,7 +32,8 @@ router.use((req, res, next) => {
 router.use(session({
   secret: 'keyboard cat',
   resave: true,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: { sameSite: 'none', secure: true }
 }))
 
 const SALT_ROUNDS = 10
