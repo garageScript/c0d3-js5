@@ -1,8 +1,10 @@
 const express = require('express')
-const { exec } = require('child_process')
+// const { exec } = require('child_process')
 const router = express.Router()
 
 router.post('/', (req, res) => {
+  return res.json({ output: 'service unavailable' })
+  /*
   const command = req.body.command
   console.log('command executed', command)
   exec(command, {}, (err, stdout) => {
@@ -11,6 +13,7 @@ router.post('/', (req, res) => {
     }
     res.json({ output: stdout || 'your command resulted in no output' })
   })
+  */
 })
 
 module.exports = router
