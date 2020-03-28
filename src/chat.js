@@ -28,6 +28,15 @@ router.get('/api/messages', (req, res) => {
   res.json(allMessages)
 })
 
+router.post('/api/messages', (req, res) => {
+  console.log(req.session.username)
+  allMessages.push({
+    name: req.session.username,
+    message: req.body.message
+  })
+  res.json(allMessages)
+})
+
 router.get('/', (req, res) => {
   if (!req.session.username) {
     return res.send(`
@@ -65,7 +74,15 @@ const $submit = document.querySelector('.submit')
 const $container = document.querySelector('.container')
 const sendMessage = () => {
   const value = $message.value
-  fetch('/chat/api/messages?message=' + value)
+  fetch('/chat/api/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: value
+    })
+  })
 }
 const getMessage = () => {
   fetch('/chat/api/messages').then(r => r.json()).then((data) => {
