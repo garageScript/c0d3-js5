@@ -1,0 +1,117 @@
+<script src="/auth.js"></script>
+<div class="app-container"></div>
+
+<script>
+const renderSelection = () => {
+  $appContainer.innerHTML = `
+    <h1>Room Name</h1>
+    <input class="roomname" type="text">
+    <button class="submit">Submit</button>
+  `
+  const $roomname = document.querySelector('.roomname')
+  const $submit = document.querySelector('.submit')
+  $submit.addEventListener('click', () => {
+    const name = $roomname.value
+    window.location = `/chatroom/${name}`
+  })
+}
+
+const renderRoom = () => {
+  $appContainer.innerHTML = `
+<h1>Chatroom</h1>
+<style>
+.name {
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 5px;
+}
+</style>
+<input class="message" type="text">
+<button class="submit">Submit</button>
+<hr />
+<div class="container"></div>
+  `
+  const $message = document.querySelector('.message')
+  const $submit = document.querySelector('.submit')
+  const $container = document.querySelector('.container')
+  const sendMessage = () => {
+    const room = window.location.pathname.split('/')[2]
+    const value = $message.value
+    fetch(`/chatroom/api/${room}/messages`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`
+      },
+      body: JSON.stringify({
+        message: value
+      })
+    })
+  }
+  const getMessage = () => {
+    const room = window.location.pathname.split('/')[2]
+    fetch(`/chatroom/api/${room}/messages`,{
+      headers: {
+        'Authorization': `Bearer ${jwtToken}`
+      }
+    }).then(r => r.json()).then((data) => {
+      $container.innerHTML = data.reduce((acc, e) => {
+        return acc + '<div><span class="name">' + e.name + '</span>' + e.message + '</div>'
+      }, '')
+      setTimeout(() => {
+        getMessage()
+      }, 500)
+    })
+  }
+  getMessage()
+  $submit.addEventListener('click', sendMessage)
+  $message.addEventListener('keyup', (e) => {
+    if(e.key === 'Enter') {
+      return sendMessage()
+    }
+  })
+}
+
+const render = () => {
+  const room = window.location.pathname.split('/')[2]
+  if (!room) {
+    return renderSelection()
+  }
+  return renderRoom()
+}
+
+const setupLogin = () => {
+  $appContainer.innerHTML = `
+    <input class="username" type="text">
+    <input class="password" type="password">
+    <button class="submit">Submit</button>
+  `
+  const $username = document.querySelector('.username')
+  const $password = document.querySelector('.password')
+  const $submit = document.querySelector('.submit')
+  $submit.addEventListener('click', () => {
+    const username = $username.value
+    const password = $password.value
+    Auth.login({
+      username, password
+    }).then( data => {
+      localStorage.setItem('userjwt', data.jwt)
+      return render()
+    })
+  })
+}
+
+const $appContainer = document.querySelector('.app-container')
+const jwtToken = localStorage.getItem('userjwt')
+if (!jwtToken) {
+  Auth.getSession().then( user => {
+    if (user && user.jwt) {
+      localStorage.setItem('userjwt', user.jwt)
+      return render()
+    } 
+    setupLogin()
+  })
+} else {
+  render()
+}
+</script>
