@@ -13,7 +13,7 @@ const authContainer = (type) => {
       },
       method: 'POST',
       body: JSON.stringify(data)
-    }).then(r => r.json()).then(console.log)
+    }).then(r => r.json())
   }
 }
 Auth.login = authContainer('session')
