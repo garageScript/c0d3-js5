@@ -3,9 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title></title>
+  <style>
+.option {
+  cursor: pointer;
+}
+  </style>
 </head>
 <body>
   <h1>Commands</h1>
+  <p>For the security of our server, only a few commands are allowed. Try some of these:</p>
+  <p class="option">ls</p>
+  <p class="option">git status</p>
+  <p class="option">ls ~/</p>
+  <p class="option">cat ~/leet/2p.js</p>
   <input class="commandInput" type="text">
   <hr>
   <pre class="output"></pre>
@@ -28,6 +38,7 @@ const sendCommand = () => {
     })
   }).then(r => r.json()).then(data => {
     output.innerText = data.output
+    commandInput.value = ''
   })
 }
 	commandInput.addEventListener('keyup', (e) => {
@@ -35,6 +46,14 @@ const sendCommand = () => {
       sendCommand()
 		}
 	})
+
+const optionList = document.querySelectorAll('.option')
+optionList.forEach(e => {
+  e.addEventListener('click', () => {
+    commandInput.value = e.innerText
+    sendCommand()
+  })
+})
   </script>
 </body>
 </html>
