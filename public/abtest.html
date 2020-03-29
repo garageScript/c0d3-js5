@@ -1,0 +1,56 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/andybrewer/mvp/mvp.css"></link>
+<main></main>
+
+<script>
+  const $main = document.querySelector('main')
+  const options = [
+    'green',
+    'purple',
+    'grey',
+    'blue',
+    'red',
+    'orange',
+    'pink'
+  ]
+
+  const generateOptions = (selected) => {
+    return options.reduce((acc, e) => {
+      console.log('selectied is', selected)
+      const selectAttr = e === selected ? 'selected' : ''
+      return acc + `
+        <option value="${e}" ${selectAttr}>${e}</option>
+      `
+    })
+  }
+
+  function User (username, selection) {
+    const element = document.createElement('section')
+    const optionStr = generateOptions(selection)
+    element.innerHTML = `
+      <h1>${username}</h1>
+      <select>
+      ${optionStr}
+      </select>
+    `
+    $main.append(element)
+
+    const $select = element.querySelector('select')
+    $select.addEventListener('change', () => {
+      fetch('https://js5.c0d3.com/abtest/api/usercolors', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          username, value: $select.value
+        })
+      })
+    })
+  }
+
+  fetch('https://js5.c0d3.com/abtest/api/usercolors').then(r => r.json()).then(data => {
+    Object.entries(data).forEach((entry) => {
+      new User(entry[0], entry[1])
+    })
+  })
+</script>

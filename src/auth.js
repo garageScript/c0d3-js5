@@ -103,7 +103,7 @@ router.post('/api/users', (req, res) => {
 })
 
 router.get('/api/users', (req, res) => {
-  res.json(Object.values(emailMapping))
+  res.json({ users: Object.values(emailMapping) })
 })
 
 router.get('/api/session', (req, res) => {
