@@ -139,6 +139,7 @@ router.get('/', (req, res) => {
   <script src="/auth.js"></script>
 <h1>Authentication</h1>
 <p>This section goes over authentication. You will be using this app to power the authentication for all your apps.</p>
+<p>To test these out, simply open your console and try them out the functions</p>
 <hr />
 <h1>SDK</h1>
 <p>
