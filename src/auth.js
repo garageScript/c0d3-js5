@@ -102,6 +102,10 @@ router.post('/api/users', (req, res) => {
   })
 })
 
+router.get('/api/users', (req, res) => {
+  res.json(Object.values(emailMapping))
+})
+
 router.get('/api/session', (req, res) => {
   if (!req.user) {
     return res.errJSON('Not logged in')
