@@ -24,4 +24,20 @@ app.use('/chatroom', chatroomRoute)
 app.use('/imggen', imggen)
 app.use('/abtest', abtestRoute)
 
+const requests = []
+app.get('/jsFile', (req, res) => {
+  res.json({
+    total: requests.length, requests
+  })
+})
+app.get('/jsFile.js', (req, res) => {
+  const date = new Date()
+  requests.unshift({
+    method: req.method,
+    time: date.toTimeString()
+  })
+  res.set('Cache-Control', 'max-age=5')
+  res.send('console.log(\'hello zach\')')
+})
+
 app.listen(process.env.PORT || 3020)
