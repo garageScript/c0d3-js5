@@ -1,13 +1,5 @@
 const express = require('express')
-const session = require('express-session')
 const router = express.Router()
-
-router.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: false,
-  cookie: { sameSite: 'none', secure: true }
-}))
 
 router.get('/api/login', (req, res) => {
   if (req.query.name) {

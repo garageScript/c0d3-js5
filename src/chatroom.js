@@ -1,15 +1,7 @@
 const express = require('express')
-const session = require('express-session')
 const path = require('path')
 const fetch = require('node-fetch')
 const router = express.Router()
-
-router.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: false,
-  cookie: { sameSite: 'none', secure: true }
-}))
 
 const allMessages = {}
 router.use('/api/:room', (req, res, next) => {

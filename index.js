@@ -1,4 +1,5 @@
 const express = require('express')
+const session = require('express-session')
 const locationRoute = require('./src/location')
 const authRoute = require('./src/auth')
 const commandRoute = require('./src/command')
@@ -13,6 +14,20 @@ const assetExercise = require('./src/assetExercise')
 app.set('trust proxy', true)
 app.use(express.static('public'))
 app.use(express.json({ limit: '50mb' }))
+
+// DOCS about session
+// resave:
+//     If your store sets an expiration date on stored sessions, then you likely need resave: true.
+// saveUninitialized:
+//     Choosing false is useful for implementing login sessions,
+//     reducing server storage usage,
+//     or complying with laws that require permission before setting a cookie.
+app.use(session({
+  secret: 'keyboard cat',
+  resave: true,
+  saveUninitialized: false,
+  cookie: { sameSite: 'none', secure: true }
+}))
 
 app.use('/assetExercise', assetExercise)
 app.use('/location', locationRoute)

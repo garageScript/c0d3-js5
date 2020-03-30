@@ -1,16 +1,9 @@
 const express = require('express')
-const session = require('express-session')
 const path = require('path')
 const { uuid } = require('uuidv4')
 const router = express.Router()
 
 const colorSelections = {}
-router.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: true,
-  cookie: { sameSite: 'none', secure: true }
-}))
 
 router.use('*', (req, res, next) => {
   if (!req.session.uid) {

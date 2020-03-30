@@ -1,7 +1,6 @@
 const express = require('express')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const session = require('express-session')
 const { uuid } = require('uuidv4')
 const { getData, setData } = require('./db')
 const router = express.Router()
@@ -21,20 +20,6 @@ router.use((req, res, next) => {
   )
   next()
 })
-
-// DOCS about session
-// resave:
-//     If your store sets an expiration date on stored sessions, then you likely need resave: true.
-// saveUninitialized:
-//     Choosing false is useful for implementing login sessions,
-//     reducing server storage usage,
-//     or complying with laws that require permission before setting a cookie.
-router.use(session({
-  secret: 'keyboard cat',
-  resave: true,
-  saveUninitialized: false,
-  cookie: { sameSite: 'none', secure: true }
-}))
 
 const SALT_ROUNDS = 10
 
@@ -84,20 +69,27 @@ const saveUser = (userInfo) => {
 
 router.post('/api/users', (req, res) => {
   const userInfo = { ...req.body, id: uuid() }
+  if (!userInfo.password || userInfo.password.length < 3) {
+    return res.status(400).errJSON('Password too short. Please make it > 5 characters')
+  }
+  if (!userInfo.username || userInfo.username === ' ') {
+    return res.status(400).errJSON('Username cannot be blank and must contain alpha numeric characters')
+  }
   if (usernameList[userInfo.username]) {
-    return res.errJSON('Username is taken, please pick another')
+    return res.status(400).errJSON('Username is taken, please pick another')
   }
   if (emailMapping[userInfo.email]) {
-    return res.errJSON('Email is taken, please pick another')
+    return res.status(400).errJSON('Email is taken, please pick another')
   }
   const tmpPassword = Buffer.from(userInfo.password, 'base64').toString()
   bcrypt.hash(tmpPassword, SALT_ROUNDS, (err, hash) => {
     if (err) {
-      return res.errJSON('Error has occurred in the server. Please try again at a later time')
+      return res.status(500).errJSON('Error has occurred in the server. Please try again at a later time')
     }
     userInfo.password = hash
     saveUser(userInfo)
     userInfo.jwt = jwt.sign({ username: userInfo.username }, privateSecret)
+    req.session.username = userInfo.username
     res.json(userInfo)
   })
 })
@@ -108,7 +100,7 @@ router.get('/api/users', (req, res) => {
 
 router.get('/api/session', (req, res) => {
   if (!req.user) {
-    return res.errJSON('Not logged in')
+    return res.status(403).errJSON('Not logged in')
   }
   return res.json(req.user)
 })
@@ -117,15 +109,15 @@ router.post('/api/session', (req, res) => {
   const userInfo = { ...req.body }
   const identity = usernameList[userInfo.username]
   if (!identity) {
-    return res.errJSON('User not found')
+    return res.status(400).errJSON('User not found')
   }
   const tmpPassword = Buffer.from(userInfo.password, 'base64').toString()
   bcrypt.compare(tmpPassword, identity.password, (err, result) => {
     if (err) {
-      return res.errJSON('Error has occurred in the server. Please try again at a later time')
+      return res.status(500).errJSON('Error has occurred in the server. Please try again at a later time')
     }
     if (!result) {
-      return res.errJSON('Wrong credentials')
+      return res.status(400).errJSON('Wrong credentials')
     }
     req.session.username = identity.username
     identity.jwt = jwt.sign({ username: identity.username }, privateSecret)
