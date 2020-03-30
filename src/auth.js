@@ -2,7 +2,8 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { uuid } = require('uuidv4')
-const { getData, setData } = require('./db')
+const { setUser } = require('./lib/middleware')
+const { saveUser, getUser, getUserByEmail, getAllUsers } = require('./lib/userlist')
 const router = express.Router()
 
 const privateSecret = 'reallygreatc0der'
@@ -23,27 +24,7 @@ router.use((req, res, next) => {
 
 const SALT_ROUNDS = 10
 
-let usernameList = {}
-const emailMapping = {}
-getData('userList').then((data) => {
-  usernameList = data || {}
-  Object.values(usernameList).forEach(user => {
-    emailMapping[user.email] = user
-  })
-})
-
-router.use('/*', (req, res, next) => {
-  if (req.session.username) {
-    req.user = usernameList[req.session.username]
-  }
-  const authToken = (req.headers.authorization || '').split(' ')
-  if (authToken) {
-    const data = jwt.decode(authToken.pop()) || {}
-    if (data.username) {
-      req.user = usernameList[data.username]
-    }
-  }
-
+router.use('/*', setUser, (req, res, next) => {
   const sendJson = res.json.bind(res)
   res.json = (...args) => {
     const newData = { ...args[0] }
@@ -61,12 +42,6 @@ router.use('/*', (req, res, next) => {
   next()
 })
 
-const saveUser = (userInfo) => {
-  usernameList[userInfo.username] = userInfo
-  emailMapping[userInfo.email] = userInfo
-  setData('userList', usernameList)
-}
-
 router.post('/api/users', (req, res) => {
   const userInfo = { ...req.body, id: uuid() }
   if (!userInfo.password || userInfo.password.length < 3) {
@@ -75,10 +50,10 @@ router.post('/api/users', (req, res) => {
   if (!userInfo.username || userInfo.username === ' ') {
     return res.status(400).errJSON('Username cannot be blank and must contain alpha numeric characters')
   }
-  if (usernameList[userInfo.username]) {
+  if (getUser(userInfo.username)) {
     return res.status(400).errJSON('Username is taken, please pick another')
   }
-  if (emailMapping[userInfo.email]) {
+  if (getUserByEmail(userInfo.email)) {
     return res.status(400).errJSON('Email is taken, please pick another')
   }
   const tmpPassword = Buffer.from(userInfo.password, 'base64').toString()
@@ -95,7 +70,7 @@ router.post('/api/users', (req, res) => {
 })
 
 router.get('/api/users', (req, res) => {
-  res.json({ users: Object.values(emailMapping) })
+  res.json({ users: getAllUsers() })
 })
 
 router.get('/api/session', (req, res) => {
@@ -107,7 +82,7 @@ router.get('/api/session', (req, res) => {
 
 router.post('/api/session', (req, res) => {
   const userInfo = { ...req.body }
-  const identity = usernameList[userInfo.username]
+  const identity = getUser(userInfo.username)
   if (!identity) {
     return res.status(400).errJSON('User not found')
   }
