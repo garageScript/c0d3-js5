@@ -1,4 +1,4 @@
-const { getData, setData } = require('../db')
+const { getData, setData } = require('./db')
 
 let usernameList = {}
 const emailMapping = {}

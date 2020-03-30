@@ -1,10 +1,10 @@
 const express = require('express')
 const geoip = require('geoip-lite')
-const { getData, setData } = require('./db')
+const { getData, setData } = require('./lib/db')
 const router = express.Router()
 
 /* INFORMATION
- * This API is powered by MaxMind. 
+ * This API is powered by MaxMind.
  * Account email: song - zheng - club
   *     key
   *         FUOqXuHii0oRYlQB

@@ -1,6 +1,6 @@
 const express = require('express')
 const fs = require('fs')
-const { getData, setData } = require('./db')
+const { getData, setData } = require('./lib/db')
 const router = express.Router()
 
 let ocrList = []
