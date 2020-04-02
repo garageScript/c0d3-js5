@@ -7,6 +7,7 @@ const ocrRoute = require('./src/ocr')
 const chatRoute = require('./src/chat')
 const chatroomRoute = require('./src/chatroom')
 const abtestRoute = require('./src/abtest')
+const todoListRoute = require('./src/todoList')
 const imggen = require('./src/imagegen')
 const app = express()
 const assetExercise = require('./src/assetExercise')
@@ -38,6 +39,8 @@ app.use('/chat', chatRoute)
 app.use('/chatroom', chatroomRoute)
 app.use('/imggen', imggen)
 app.use('/abtest', abtestRoute)
+app.use('/abtest', abtestRoute)
+app.use('/todoList', todoListRoute)
 
 const requests = []
 app.get('/jsFile', (req, res) => {

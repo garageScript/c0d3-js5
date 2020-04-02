@@ -2,7 +2,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { uuid } = require('uuidv4')
-const { setUser } = require('./lib/middleware')
+const { setUser, cors } = require('./lib/middleware')
 const { saveUser, getUser, getUserByEmail, getAllUsers } = require('./lib/userlist')
 const router = express.Router()
 
@@ -10,17 +10,7 @@ const privateSecret = 'reallygreatc0der'
 
 // For CORS. Must be placed at the top so this handles
 // cors request first before propagating to other middlewares
-// Credentials - https://stackoverflow.com/questions/24687313/what-exactly-does-the-access-control-allow-credentials-header-do
-router.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true)
-  res.header('Access-Control-Allow-Origin', req.headers.origin)
-  res.header('Access-Control-Allow-Methods', 'GET', 'PUT, POST') // cors preflight
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Credentials'
-  )
-  next()
-})
+router.use(cors())
 
 const SALT_ROUNDS = 10
 
