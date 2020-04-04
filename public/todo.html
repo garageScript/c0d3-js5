@@ -215,6 +215,14 @@ const setupSignup = () => {
 }
 
 const $appContainer = document.querySelector('.app-container')
+
+const startApp = () => {
+}
+
+startApp()
+
+
+
 Auth.getSession().then( user => {
   if (user.error && user.error.message) {
     console.log('Cannot get user session')

@@ -34,17 +34,20 @@ router.use('/*', setUser, (req, res, next) => {
 
 router.post('/api/users', (req, res) => {
   const userInfo = { ...req.body, id: uuid() }
-  if (!userInfo.password || userInfo.password.length < 3) {
-    return res.status(400).errJSON('Password too short. Please make it > 5 characters')
+  if (!userInfo.password || userInfo.password.length < 5) {
+    return res.status(400).errJSON('password field cannot be empty and cannot be less than 5 characters')
   }
-  if (!userInfo.username || userInfo.username === ' ') {
-    return res.status(400).errJSON('Username cannot be blank and must contain alpha numeric characters')
+  if (!userInfo.username || userInfo.username.includes(' ')) {
+    return res.status(400).errJSON('username field cannot be blank and must contain alpha numeric characters only')
+  }
+  if (!userInfo.email || !userInfo.email.includes('@')) {
+    return res.status(400).errJSON('email field cannot be blank and must be a valid email')
   }
   if (getUser(userInfo.username)) {
-    return res.status(400).errJSON('Username is taken, please pick another')
+    return res.status(400).errJSON('username is taken, please pick another')
   }
   if (getUserByEmail(userInfo.email)) {
-    return res.status(400).errJSON('Email is taken, please pick another')
+    return res.status(400).errJSON('email is taken, please pick another')
   }
   const tmpPassword = Buffer.from(userInfo.password, 'base64').toString()
   bcrypt.hash(tmpPassword, SALT_ROUNDS, (err, hash) => {
