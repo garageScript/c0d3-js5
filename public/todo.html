@@ -106,7 +106,7 @@ function Todo (todo, container) {
 const render = () => {
   $appContainer.innerHTML = `
   <header>
-    <h1>Todo List for ${username}</h1>
+    <h1>Todo List for ${globalUsername}</h1>
   </header>
   <div class="todolist">
   <section>
@@ -116,16 +116,6 @@ const render = () => {
   </section>
   </div>
   `
-  const todolist = $appContainer.querySelector('.todolist')
-  fetch('https://js5.c0d3.com/todolist/api/todos', {
-    credentials: 'include'
-  }).then(r => r.json()).then(arr => {
-    arr.sort((a, b) => {
-      return b.createdAt - a.createdAt
-    }).forEach(todo => {
-      new Todo(todo, todolist)
-    })
-  })
   const input = $appContainer.querySelector('.todo-edit-input')
   input.focus()
   input.addEventListener('keyup', (e) => {
@@ -139,12 +129,28 @@ const render = () => {
         body: JSON.stringify({
           text: input.value
         })
-      }).then(r => r.json()).then(render)
+      }).then(r => {
+        return r.json()
+      }).then(render)
     }
+  })
+
+  const $todolist = $appContainer.querySelector('.todolist')
+  // create a Todo object like this: new Todo(element, $todolist)
+  fetch('https://js5.c0d3.com/todolist/api/todos', {
+    credentials: 'include'
+  }).then(r => {
+    return r.json()
+  }).then(arr => {
+    arr.sort((a, b) => {
+      return b.createdAt - a.createdAt
+    }).forEach(todo => {
+      new Todo(todo, $todolist)
+    })
   })
 }
 
-let username
+let globalUsername
 const setupLogin = () => {
   $appContainer.innerHTML = `
     <h1>You must be logged in</h1>
@@ -163,13 +169,23 @@ const setupLogin = () => {
     setupSignup()
   })
   $submit.addEventListener('click', () => {
-    username = $username.value
-    const password = $password.value
-    Auth.login({
-      username, password
-    }).then( data => {
-      if (data.username) {
-        return render()
+    fetch('https://js5.c0d3.com/auth/api/sessions', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: $username.value,
+        password: btoa($password.value)
+      })
+    }).then( (response) => {
+      console.log(response.status)
+      return response.json()
+    }).then( (body) => {
+      if (body.username) {
+        globalUsername = body.username
+        render()
       }
     })
   })
@@ -197,40 +213,45 @@ const setupSignup = () => {
     setupLogin()
   })
   $submit.addEventListener('click', () => {
-    username = $username.value
-    const password = $password.value
-    const name = $name.value
-    const email = $email.value
-    Auth.signup({
-      username, password, email, name
-    }).then( data => {
-      if (data.error) {
-        return console.log('data error', data.error)
-      }
-      if (data.username) {
-        return render()
+    fetch('https://js5.c0d3.com/auth/api/users', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: $username.value,
+        email: $email.value,
+        name: $name.value,
+        password: btoa($password.value)
+      })
+    }).then( (response) => {
+      console.log(response.status)
+      return response.json()
+    }).then( (body) => {
+      if (body.username) {
+        globalUsername = body.username
+        render()
       }
     })
   })
 }
 
 const $appContainer = document.querySelector('.app-container')
-
 const startApp = () => {
+  fetch('https://js5.c0d3.com/auth/api/sessions', {
+    credentials: 'include',
+  }).then((r) => {
+    return r.json()
+  }).then( (body) => {
+    if (body.error) {
+      return setupLogin()
+    }
+    if(body.username) {
+      globalUsername = body.username
+      render()
+    }
+  })
 }
-
 startApp()
-
-
-
-Auth.getSession().then( user => {
-  if (user.error && user.error.message) {
-    console.log('Cannot get user session')
-  }
-  if (user && user.username) {
-    username = user.username
-    return render()
-  }
-  setupLogin()
-})
 </script>

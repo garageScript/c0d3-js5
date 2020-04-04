@@ -23,7 +23,7 @@ middlewares.cors = () => {
     // Credentials - https://stackoverflow.com/questions/24687313/what-exactly-does-the-access-control-allow-credentials-header-do
     res.header('Access-Control-Allow-Credentials', true)
     res.header('Access-Control-Allow-Origin', req.headers.origin)
-    res.header('Access-Control-Allow-Methods', 'GET', 'PUT, POST') // cors preflight
+    res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE') // cors preflight
     res.header(
       'Access-Control-Allow-Headers',
       'Origin, X-Requested-With, Content-Type, Accept, Credentials'
