@@ -35,7 +35,7 @@ router.use('/*', setUser, (req, res, next) => {
 router.post('/api/users', (req, res) => {
   const userInfo = { ...req.body, id: uuid() }
   if (!userInfo.password || userInfo.password.length < 5) {
-    return res.status(400).errJSON('password field cannot be empty and cannot be less than 5 characters')
+    return res.status(400).errJSON('password field cannot be empty and must be base 64 encoded with more than 5 characters')
   }
   if (!userInfo.username || userInfo.username.includes(' ')) {
     return res.status(400).errJSON('username field cannot be blank and must contain alpha numeric characters only')
@@ -66,14 +66,14 @@ router.get('/api/users', (req, res) => {
   res.json({ users: getAllUsers() })
 })
 
-router.get('/api/session', (req, res) => {
+router.get(['/api/session', '/api/sessions'], (req, res) => {
   if (!req.user) {
     return res.status(403).errJSON('Not logged in')
   }
   return res.json(req.user)
 })
 
-router.post('/api/session', (req, res) => {
+router.post(['/api/session', '/api/sessions'], (req, res) => {
   const userInfo = { ...req.body }
   const identity = getUser(userInfo.username)
   if (!identity) {

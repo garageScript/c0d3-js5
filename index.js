@@ -23,11 +23,12 @@ app.use(express.json({ limit: '50mb' }))
 //     Choosing false is useful for implementing login sessions,
 //     reducing server storage usage,
 //     or complying with laws that require permission before setting a cookie.
+const FIVE_MINUTES = 1000 * 60 * 5
 app.use(session({
   secret: 'keyboard cat',
   resave: true,
   saveUninitialized: false,
-  cookie: { sameSite: 'none', secure: true }
+  cookie: { sameSite: 'none', secure: true, maxAge: FIVE_MINUTES }
 }))
 
 app.use('/assetExercise', assetExercise)
