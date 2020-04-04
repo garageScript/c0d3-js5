@@ -25,7 +25,7 @@ router.post('/api/todos', (req, res) => {
   if (!req.body.text) {
     return res.status(400).json({
       error: {
-        message: 'body text field cannot be empty'
+        message: 'text field cannot be empty'
       }
     })
   }
@@ -50,6 +50,14 @@ router.patch('/api/todos/:id', (req, res) => {
   const todo = req.todoList[req.params.id]
   const acceptable = ['text', 'complete']
   let isInvalid = false
+  const { text, complete } = req.body
+  if (!text && !complete) {
+    return res.status(400).json({
+      error: {
+        message: 'text field and/or complete field required in the body. text field must be a string, complete must be a boolean.'
+      }
+    })
+  }
   Object.keys(req.body).forEach((key) => {
     if (!acceptable.includes(key)) {
       isInvalid = `modifying ${key} is not allowed`
