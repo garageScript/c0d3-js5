@@ -51,7 +51,7 @@ router.patch('/api/todos/:id', (req, res) => {
   const acceptable = ['text', 'complete']
   let isInvalid = false
   const { text, complete } = req.body
-  if (!text && !complete) {
+  if (!text && (complete === undefined || complete === null)) {
     return res.status(400).json({
       error: {
         message: 'text field and/or complete field required in the body. text field must be a string, complete must be a boolean.'
