@@ -41,7 +41,6 @@ app.use('/chat', chatRoute)
 app.use('/chatroom', chatroomRoute)
 app.use('/imggen', imggen)
 app.use('/abtest', abtestRoute)
-app.use('/abtest', abtestRoute)
 app.use('/todoList', todoListRoute)
 app.use('/examples', exampleRoute)
 

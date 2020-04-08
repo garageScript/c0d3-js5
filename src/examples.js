@@ -3,6 +3,16 @@ const fs = require('fs')
 const { uuid } = require('uuidv4')
 const router = express.Router()
 
+router.options('/api/*', (req, res) => {
+  res.header('Access-Control-Allow-Credentials', true)
+  res.header('Access-Control-Allow-Origin', req.headers.origin)
+  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Credentials'
+  )
+  res.send('ok')
+})
 /*
 const getCookieValue = (cookie = '', key) => {
   const cookieStr = cookie.split(';').find(str => {
