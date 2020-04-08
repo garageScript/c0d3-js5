@@ -9,6 +9,7 @@ const chatroomRoute = require('./src/chatroom')
 const abtestRoute = require('./src/abtest')
 const todoListRoute = require('./src/todoList')
 const imggen = require('./src/imagegen')
+const exampleRoute = require('./src/examples')
 const app = express()
 const assetExercise = require('./src/assetExercise')
 
@@ -42,6 +43,7 @@ app.use('/imggen', imggen)
 app.use('/abtest', abtestRoute)
 app.use('/abtest', abtestRoute)
 app.use('/todoList', todoListRoute)
+app.use('/examples', exampleRoute)
 
 const requests = []
 app.get('/jsFile', (req, res) => {
