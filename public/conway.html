@@ -1,0 +1,215 @@
+<body>
+<style>
+.box {
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border: 1px solid #aaa;
+  position: absolute;
+}
+.box.selected {
+  background-color: #aaa;
+}
+.startbox {
+  padding: 10px;
+  width: 300px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 3;
+  background-color: #eee;
+}
+</style>
+<div class="startbox">
+  Run every <input class="timer" type="number" value=1000>ms
+  <button class="start">START</button>
+  <hr>
+  <h3>
+    Conway's Game of Life Rules
+  </h3>
+  <p>
+    You can find some starting patterns on 
+    <a href="https://www.conwaylife.com/wiki/Conway's_Game_of_Life">Wikipedia</a>
+  </p>
+  <ul>
+  <li>Any live cell with two or three neighbors survives.</li>
+  <li>Any dead cell with three live neighbors becomes a live cell.</li>
+  <li>All other live cells die in the next generation. Similarly, all other dead cells stay dead.</li>
+  </ul>
+</div>
+<script>
+  const width = document.body.clientWidth
+  const height = document.body.clientHeight
+  const boxSize = 10
+  const maxRows = (height / boxSize) - 1
+  const maxCols = (width / boxSize) - 1 
+
+  let alives = []
+
+  function Box(row, col) {
+    const posy = row * boxSize
+    const posx = col * boxSize
+    const element = document.createElement('div')
+    element.classList.add('box')
+    element.style.left = `${posx}px`
+    element.style.top = `${posy}px`
+    document.body.append(element)
+    let aliveIndex = -1
+
+    element.addEventListener('click', () => {
+      element.classList.toggle('selected')
+      if (this.isAlive()) {
+        aliveIndex = (alives.push(this)) - 1
+      } else {
+        if (alives[aliveIndex]) {
+          alives[aliveIndex] = null 
+        }
+        aliveIndex = -1
+      }
+    })
+
+    this.isAlive = () => {
+      return element.classList.contains('selected')
+    }
+
+    this.getKey = () => {
+      return `${row},${col}`
+    }
+
+    this.die = () => {
+      element.classList.remove('selected')
+      aliveIndex = -1
+    }
+
+    this.resurrect = () => {
+      aliveIndex = (alives.push(this)) - 1
+      element.classList.add('selected')
+    }
+
+    this.getNeighbors = () => {
+      const neighbors = []
+      // top left - top right
+      if (grid[row-1] && grid[row-1][col-1]) {
+        neighbors.push( grid[row-1][col-1])
+      }
+      if (grid[row-1] && grid[row-1][col]) {
+        neighbors.push( grid[row-1][col])
+      }
+      if (grid[row-1] && grid[row-1][col + 1]) {
+        neighbors.push( grid[row-1][col + 1])
+      }
+      // left - right
+      if (grid[row] && grid[row][col-1]) {
+        neighbors.push( grid[row][col-1] )
+      }
+      if (grid[row] && grid[row][col + 1]) {
+        neighbors.push( grid[row][col + 1])
+      }
+      // bottom left - bottom right
+      if (grid[row+1] && grid[row+1][col-1]) {
+        neighbors.push( grid[row+1][col-1])
+      }
+      if (grid[row+1] && grid[row+1][col]) {
+        neighbors.push( grid[row+1][col])
+      }
+      if (grid[row+1] && grid[row+1][col + 1]) {
+        neighbors.push( grid[row+1][col + 1])
+      }
+      return neighbors
+    }
+  }
+  
+const grid = []
+
+const makeBoxes = (rowIndex, row=[],  col=0) => {
+  if (col === maxCols) {
+    return row
+  }
+  row.push( new Box(rowIndex, col) )
+  return makeBoxes(rowIndex, row, col + 1)
+}
+
+const makeRows = (i=0) => {
+  if (i===maxRows) {
+    return
+  }
+  grid.push( makeBoxes(i) )
+  return makeRows(i + 1)
+}
+
+let newAlives = []
+const start = () => {
+  if (!alives.length) {
+    alert('All dead. Refresh the page and restart!')
+    return window.location.reload()
+  }
+  const map = {}
+  const toDieList = []
+  const toResurrectList = []
+  alives.filter(e => e).forEach(alive => {
+    const aliveNeighbors = []
+    const notAliveNeighbors = []
+    alive.getNeighbors().forEach( box => {
+      if (box.isAlive()) {
+        return aliveNeighbors.push(box)
+      }
+      notAliveNeighbors.push(box)
+    })
+
+    notAliveNeighbors.forEach(e => {
+      const key = e.getKey()
+      map[key] = (map[key] || 0) + 1
+    })
+
+    if (aliveNeighbors.length === 2 || aliveNeighbors.length === 3) {
+      return newAlives.push(alive)
+    }
+
+    toDieList.push(alive)
+  })
+
+  alives = newAlives
+  newAlives = []
+
+  Object.entries(map).forEach( ([key, count]) => {
+    if (count === 3) {
+      const [row, col] = key.split(',')
+      toResurrectList.push(grid[row][col])
+    }
+  })
+  toDieList.forEach(e => {
+    e.die()
+  })
+  toResurrectList.forEach(e => {
+    e.resurrect()
+  })
+}
+
+const runGame = (value) => {
+  start()
+  setTimeout(() => {
+    runGame(value)
+  }, value)
+}
+
+const startbox = document.querySelector('.startbox')
+const timer = document.querySelector('.timer')
+const startButton = document.querySelector('.start')
+const startApp = () => {
+  const value = timer.value
+  if(value <= 50) {
+    return alert('value cannot be < 50')
+  }
+  startbox.remove()
+  runGame(value)
+}
+startButton.addEventListener('click', startApp)
+timer.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') {
+    startApp()
+  }
+})
+
+makeRows()
+</script>
+</body>
