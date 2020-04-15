@@ -41,8 +41,8 @@
   const width = document.body.clientWidth
   const height = document.body.clientHeight
   const boxSize = 10
-  const maxRows = (height / boxSize) - 1
-  const maxCols = (width / boxSize) - 1 
+  const maxRows = Math.floor((height / boxSize) - 1 )
+  const maxCols = Math.floor((width / boxSize) - 1 )
 
   let alives = []
 
