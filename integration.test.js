@@ -1,3 +1,4 @@
+/* globals describe beforeAll afterAll test expect */
 const { startServer, stopServer } = require('./server.js')
 const { promisify } = require('util')
 
