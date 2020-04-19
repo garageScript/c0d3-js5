@@ -2,6 +2,18 @@ const express = require('express')
 const fs = require('fs')
 const { getData, setData } = require('./lib/db')
 const router = express.Router()
+/*
+const path = require('path')
+const Tesseract = require('tesseract.js')
+
+Tesseract.recognize(
+  path.resolve(__dirname, '../public/uploaded_images/2.png'),
+  'eng',
+  { logger: m => console.log(m) }
+).then(({ data: { text } }) => {
+  console.log(text)
+})
+*/
 
 let ocrList = []
 getData('ocrdata').then((data) => {
@@ -21,6 +33,13 @@ router.post('/', (req, res) => {
 router.get('/search/:query', (req, res) => {
   const query = req.params.query.replace(/[^a-z0-9]/gi, '').toLowerCase()
   const results = ocrList.filter(d => d.text.includes(query))
+  res.json(results)
+})
+
+router.get('/blah', (req, res) => {
+  const query = req.params.query.replace(/[^a-z0-9]/gi, '').toLowerCase()
+  const results = ocrList.filter(d => d.text.includes(query))
+
   res.json(results)
 })
 

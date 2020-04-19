@@ -29,7 +29,7 @@ router.get('/api/session', (req, res) => {
 router.post('/api/:room/messages', (req, res) => {
   const roomName = req.params.room
   allMessages[roomName] = allMessages[roomName] || []
-  allMessages[req.params.room].push({
+  allMessages[req.params.room].unshift({
     name: req.user.username,
     message: req.body.message
   })

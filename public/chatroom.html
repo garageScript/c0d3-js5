@@ -17,8 +17,9 @@ const renderSelection = () => {
 }
 
 const renderRoom = () => {
+  const roomName = window.location.pathname.split('/')[2]
   $appContainer.innerHTML = `
-<h1>Chatroom</h1>
+<h1>Chatroom: ${roomName}</h1>
 <style>
 .name {
   font-weight: bold;
@@ -27,13 +28,13 @@ const renderRoom = () => {
 }
 </style>
 <input class="message" type="text">
-<button class="submit">Submit</button>
 <hr />
 <div class="container"></div>
   `
   const $message = document.querySelector('.message')
-  const $submit = document.querySelector('.submit')
   const $container = document.querySelector('.container')
+  $message.focus()
+
   const sendMessage = () => {
     const room = window.location.pathname.split('/')[2]
     const value = $message.value
@@ -46,6 +47,8 @@ const renderRoom = () => {
       body: JSON.stringify({
         message: value
       })
+    }).then( () => {
+      $message.value = ''
     })
   }
   const getMessage = () => {
@@ -64,7 +67,6 @@ const renderRoom = () => {
     })
   }
   getMessage()
-  $submit.addEventListener('click', sendMessage)
   $message.addEventListener('keyup', (e) => {
     if(e.key === 'Enter') {
       return sendMessage()
