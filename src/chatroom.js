@@ -4,10 +4,10 @@ const fetch = require('node-fetch')
 const router = express.Router()
 
 const allMessages = {}
-router.use('/api/:room', (req, res, next) => {
-  const jwtToken = req.headers.authorization.split(' ').pop()
+router.use('/api/*', (req, res, next) => {
+  const jwtToken = (req.headers.authorization || '').split(' ').pop()
   if (!jwtToken) {
-    return res.status(403)
+    return res.status(403).json({ error: { message: 'Not Logged In' } })
   }
   return fetch('https://js5.c0d3.com/auth/api/session', {
     headers: {
@@ -15,16 +15,20 @@ router.use('/api/:room', (req, res, next) => {
     }
   }).then(r => r.json()).then(data => {
     if (!data.username) {
-      return res.status(403)
+      return res.status(403).json({ error: { message: 'Not Logged In' } })
     }
     req.user = data
-    const roomName = req.params.room
-    allMessages[roomName] = allMessages[roomName] || []
     next()
   })
 })
 
+router.get('/api/session', (req, res) => {
+  res.json(req.user)
+})
+
 router.post('/api/:room/messages', (req, res) => {
+  const roomName = req.params.room
+  allMessages[roomName] = allMessages[roomName] || []
   allMessages[req.params.room].push({
     name: req.user.username,
     message: req.body.message
@@ -33,7 +37,9 @@ router.post('/api/:room/messages', (req, res) => {
 })
 
 router.get('/api/:room/messages', (req, res) => {
-  res.json(allMessages[req.params.room])
+  const roomName = req.params.room
+  allMessages[roomName] = allMessages[roomName] || []
+  res.json(allMessages[roomName])
 })
 
 router.get('/*', (req, res) => {
