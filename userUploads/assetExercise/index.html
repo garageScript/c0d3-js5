@@ -100,7 +100,8 @@
 const findGetParameter = (parameterName) => {
   const result = location.search.substr(1).split("&").find((item) => {
     return item.split("=")[0] === parameterName
-  }) || '';
+  });
+  if (!result) return null
   return decodeURIComponent(result.split("=")[1]);
 }
 
@@ -111,7 +112,6 @@ const fnameElement = document.querySelector('.filename__input')
 const createButton = document.querySelector('.file__create-button')
 const filelist = document.querySelector('.filelist')
 createButton.addEventListener('click', (e) => {
-  console.log('clicked')
 	const name = fnameElement.value
 	const content = editor.getValue()
   fetch('/assetExercise/api/files', {
@@ -128,6 +128,7 @@ createButton.addEventListener('click', (e) => {
 })
 
 const initialFileName = findGetParameter('file')
+console.log('initial', initialFileName)
 if (initialFileName) {
   fetch(`/assetExercise/api/files/${initialFileName}`).then(r => r.json()).then(data => {
     editor.setValue(data.content)

@@ -21,6 +21,10 @@ router.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, `../${assetPath}/index.html`))
 })
 
+router.get('/simple', function (req, res) {
+  res.sendFile(path.join(__dirname, '../views/assetExercise.html'))
+})
+
 router.post('/api/files', function (req, res) {
   fs.writeFile(path.join(__dirname, `../${assetPath}/${req.body.name}`), req.body.content, () => {})
   res.json(req.body)
