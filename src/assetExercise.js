@@ -6,27 +6,31 @@ const multer = require('multer')
 const router = express.Router()
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, `../public/assetExercise/`),
+  destination: path.join(__dirname, '../public/assetExercise/'),
   filename: function (_, file, cb) {
     cb(null, `${file.originalname.replace(/ /g, '-')}`)
   }
 })
-const upload = multer({storage})
+const upload = multer({ storage })
+
+const assetPath = 'userUploads/assetExercise'
+router.get('/userUploads', express.static(path.join(__dirname, `../${assetPath}`)))
 
 // define the home page route
 router.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../public/assetExercise/index.html'))
+  console.log('whach eettting?')
+  res.sendFile(path.join(__dirname, `../${assetPath}/index.html`))
 })
 
 router.post('/api/files', function (req, res) {
-  fs.writeFile(path.join(__dirname, `../public/assetExercise/${req.body.name}`), req.body.content, () => {})
+  fs.writeFile(path.join(__dirname, `../${assetPath}/${req.body.name}`), req.body.content, () => {})
   res.json(req.body)
 })
 
 router.post('/api/assets', upload.any('assets'), function (req, res) {
-  const fileListResponse = req.files.map( f => {
+  const fileListResponse = req.files.map(f => {
     return {
-      name: f.filename,
+      name: f.filename
     }
   })
 
@@ -34,7 +38,7 @@ router.post('/api/assets', upload.any('assets'), function (req, res) {
 })
 
 router.get('/api/files', function (req, res) {
-  fs.readdir(path.join(__dirname, `../public/assetExercise/`), (err, data) => {
+  fs.readdir(path.join(__dirname, `../${assetPath}`), (err, data) => {
     res.json(data || [])
   })
 })
@@ -50,4 +54,3 @@ router.get('/api/files/:name', function (req, res) {
 })
 
 module.exports = router
-
