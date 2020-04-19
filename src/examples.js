@@ -1,7 +1,11 @@
 const express = require('express')
 const fs = require('fs')
+const path = require('path')
 const { uuid } = require('uuidv4')
 const router = express.Router()
+
+const uploadPath = 'userUploads/webcam'
+router.use(`/${uploadPath}`, express.static(path.resolve(__dirname, `../${uploadPath}`)))
 
 router.options('/api/*', (req, res) => {
   res.header('Access-Control-Allow-Credentials', true)
@@ -54,23 +58,23 @@ document.body.addEventListener('dragleave', clearScreen)
 
 document.body.addEventListener('drop', (e) => {
   e.preventDefault()
-	const files = Array.from(e.target.files || e.dataTransfer.files)
+  const files = Array.from(e.target.files || e.dataTransfer.files)
   // No files
-	if (!files.length) {
-		return
-	}
+  if (!files.length) {
+    return
+  }
 
-	const formData = new FormData()
+  const formData = new FormData()
   files.forEach( file => {
-		formData.append('assets[]', file, file.name)
+    formData.append('assets[]', file, file.name)
   })
-	fetch('/assetExercise/api/assets', {
-		method: 'POST',
-		body: formData
-	}).then( r => r.json() ).then(arr => {
-		window.location.reload()
-	})
-	return clearScreen(e)
+  fetch('/assetExercise/api/assets', {
+    method: 'POST',
+    body: formData
+  }).then( r => r.json() ).then(arr => {
+    window.location.reload()
+  })
+  return clearScreen(e)
 })
 </script>
   `)
@@ -314,6 +318,25 @@ router.get('/getfile', async (req, res) => {
     <div>${data}</div>
     `)
   })
+})
+
+router.post('/images', async (req, res) => {
+  const filename = `${uuid()}.png`
+  const imgPath = path.resolve(__dirname, `../${uploadPath}/${filename}`)
+  fs.writeFile(imgPath, req.body.img, 'base64', (err) => {
+    if (err) {
+      console.log(err)
+      return res.status(500).send('Error writing file')
+    }
+    res.json({
+      link: `https://js5.c0d3.com/examples/${uploadPath}/${filename}`
+    })
+  })
+})
+
+router.get('/webcam', async (req, res) => {
+  console.log(req.body)
+  res.sendFile(path.resolve(__dirname, '../views/webcam.html'))
 })
 
 module.exports = router

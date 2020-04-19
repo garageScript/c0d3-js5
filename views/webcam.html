@@ -1,0 +1,53 @@
+<video class="video" width=640 height=480></video>
+<canvas class="canvas" width=640 height=480></canvas>
+<button class="button hidden">Take Picture</button>
+<hr>
+<h3>Images</h3>
+<div class="imageContainer"></div>
+<style>
+.button.hidden {
+  display: none;
+}
+</style>
+
+<script>
+const videoElement = document.querySelector('.video')
+const canvasElement = document.querySelector('.canvas')
+const context = canvasElement.getContext('2d')
+const buttonElement = document.querySelector('.button')
+const imageContainer = document.querySelector('.imageContainer')
+
+navigator.mediaDevices.getUserMedia({
+  video: true, // webcam
+  audio: false, // microphone
+}).then((stream) => {
+  videoElement.srcObject = stream
+  videoElement.play()
+  buttonElement.classList.remove('hidden')
+})
+
+buttonElement.addEventListener('click', () => {
+  context.drawImage(videoElement, 0, 0, 640, 480)
+
+  const pngData = canvasElement.toDataURL();
+  const base64Data = pngData.replace(/^data:image\/png;base64,/, "");
+
+  // TODO: change this URL to your localhost url!
+  fetch('https://js5.c0d3.com/examples/images', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      img: base64Data
+    })
+  }).then(r => r.json()).then(data => {
+    const link = data.link
+    imageContainer.innerHTML = imageContainer.innerHTML + `
+    <div><a href="${link}" target="_blank">${link}</a></div>
+    `
+  })
+})
+
+</script>
+
