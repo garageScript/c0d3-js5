@@ -2,28 +2,47 @@ const express = require('express')
 const Jimp = require('jimp')
 const router = express.Router()
 
-router.get('/api/:name', async (req, res) => {
-  const category = req.query.category || 'any'
-  console.log('category', category)
-  const image = await Jimp.read(`https://placeimg.com/640/360/${category}`)
+let fontWhite, fontBlack
+Promise.all([Jimp.loadFont(Jimp.FONT_SANS_32_WHITE), Jimp.loadFont(Jimp.FONT_SANS_32_BLACK)]).then(fonts => {
+  fontWhite = fonts[0]
+  fontBlack = fonts[1]
+})
 
-  if (req.query.greyscale) {
-    image.greyscale()
+const memeMap = { }
+
+router.get('/api/:text', async (req, res) => {
+  const { src, blur, black } = req.query
+  const text = req.params.text
+  const key = `${src}${text}${blur}${black}`
+  const memeInfo = memeMap[key]
+  if (memeInfo) {
+    memeInfo.count += 1
+    res.set('Content-Type', 'image/jpeg')
+    return res.send(memeInfo.image)
   }
+  const url = src || 'https://placeimg.com/640/360/any'
+  const image = await Jimp.read(url)
 
-  if (req.query.sepia) {
-    image.sepia()
+  if (blur) {
+    image.blur(parseInt(blur))
   }
-
-  if (req.query.blur) {
-    image.blur(parseInt(req.query.blur))
-  }
-
-  const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE)
-  image.print(font, 0, 0, {
-    text: req.params.name || 'Herro'
-  }, 640, 360)
+  const font = black ? fontBlack : fontWhite
+  image.print(font, 0, 0, req.params.text || 'Herro')
   const buffer = await image.getBufferAsync(Jimp.MIME_JPEG)
+  if (Object.keys(memeMap).length > 1) {
+    const smallestKey = Object.keys(memeMap).reduce((acc, mapKey) => {
+      if (!memeMap[acc] || memeMap[mapKey].count < memeMap[acc].count) {
+        return mapKey
+      }
+      return acc
+    }, '')
+    delete memeMap[smallestKey]
+  }
+  memeMap[key] = {
+    image: buffer,
+    count: 0,
+    key
+  }
   res.set('Content-Type', 'image/jpeg')
   res.send(buffer)
 })
