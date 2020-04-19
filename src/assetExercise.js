@@ -18,7 +18,6 @@ router.get('/userUploads', express.static(path.join(__dirname, `../${assetPath}`
 
 // define the home page route
 router.get('/', function (req, res) {
-  console.log('whach eettting?')
   res.sendFile(path.join(__dirname, `../${assetPath}/index.html`))
 })
 
@@ -39,12 +38,18 @@ router.post('/api/assets', upload.any('assets'), function (req, res) {
 
 router.get('/api/files', function (req, res) {
   fs.readdir(path.join(__dirname, `../${assetPath}`), (err, data) => {
+    if (err) {
+      res.status(500).json(err)
+    }
     res.json(data || [])
   })
 })
 
 router.get('/api/files/:name', function (req, res) {
-  fs.readFile(path.join(__dirname, `../public/assetExercise/${req.params.name}`), (err, fileContent) => {
+  fs.readFile(path.join(__dirname, `../${assetPath}/${req.params.name}`), (err, fileContent) => {
+    if (err) {
+      res.status(500).json(err)
+    }
     const content = (fileContent && fileContent.toString()) || ''
     res.json({
       name: req.params.name,
