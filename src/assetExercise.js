@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 const assetPath = 'userUploads/assetExercise'
-router.get('/userUploads', express.static(path.join(__dirname, `../${assetPath}`)))
+router.use('/userUploads', express.static(path.join(__dirname, `../${assetPath}`)))
 
 // define the home page route
 router.get('/', function (req, res) {
