@@ -1,0 +1,129 @@
+<style type="text/css" media="screen">
+.leftSide {
+	position: absolute;
+	top: 50px;
+	left: 0;
+	bottom: 0;
+	width: 300px;
+  box-sizing: border-box;
+}
+.filecontainer {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  margin-bottom: 5px;
+  background-color: #eee;
+}
+.file__open {
+  color: #9fa;
+  font-size: 25px;
+  padding: 0px;
+  margin: 0px;
+  cursor:pointer;
+}
+#editor { 
+	position: absolute;
+	top: 50px;
+	right: 0;
+	bottom: 0;
+	left: 300px;
+}
+.filename__input {
+  height: 40px;
+  width: 100%;
+  font-size: 15px;
+}
+.file__create-button {
+  width: 200px;
+  font-size: 15px;
+}
+.container {
+  display: flex;
+}
+.file {
+  cursor: pointer;
+}
+</style>
+
+<div class="container">
+<input class="filename__input" type="text" placeholder="File Name">
+<button class="file__create-button">Create File</button>
+</div>
+
+<div id="editor"></div>
+<div class="leftSide">
+  <div class="filelist"></div>
+</div>
+
+<script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="//ajaxorg.github.io/ace-builds/src-min-noconflict/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+<script>
+const findGetParameter = (parameterName) => {
+  const result = location.search.substr(1).split("&").find((item) => {
+    return item.split("=")[0] === parameterName
+  });
+  if (!result) return null
+  return decodeURIComponent(result.split("=")[1]);
+}
+
+const editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+
+const fnameElement = document.querySelector('.filename__input')
+const createButton = document.querySelector('.file__create-button')
+const filelist = document.querySelector('.filelist')
+createButton.addEventListener('click', (e) => {
+	const name = fnameElement.value
+	const content = editor.getValue()
+  fetch('/assetExercise/api/files', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      name, content
+    })
+  }).then( () => {
+    window.location.reload()
+  })
+})
+
+const initialFileName = findGetParameter('file')
+if (initialFileName) {
+  fetch(`/assetExercise/api/files/${initialFileName}`).then(r => r.json()).then(data => {
+    editor.setValue(data.content)
+  })
+  fnameElement.value = initialFileName
+  const modelist = ace.require("ace/ext/modelist")
+  editor.session.setMode( modelist.getModeForPath(initialFileName).mode )
+}
+
+const File = function(name) {
+  const element = document.createElement('div')
+  element.innerHTML = `
+  <div class="filecontainer">
+    <p class="file">
+    <a href="/assetExercise/simple?file=${name}">${name}</a>
+    </p>
+    <p class="file__open">&#129488</p>
+  </div>
+  `
+  filelist.append(element)
+  const openButton = element.querySelector('.file__open')
+  openButton.addEventListener('mousemove', () => {
+    openButton.innerHTML = '&#129321'
+  })
+  openButton.addEventListener('mouseout', () => {
+    openButton.innerHTML = '&#129488'
+  })
+  openButton.addEventListener('click', () => {
+    window.open(`/assetExercise/userUploads/${name}`);
+  })
+}
+
+let allFiles = []
+fetch('/assetExercise/api/files').then(r => r.json()).then(data => {
+  allFiles = data.map(d => new File(d))
+})
+
+</script>
