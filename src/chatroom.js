@@ -11,7 +11,7 @@ router.use('/api/*', (req, res, next) => {
   }
   return fetch('https://js5.c0d3.com/auth/api/session', {
     headers: {
-      Authorization: `Authorization ${jwtToken}`
+      Authorization: `Bearer ${jwtToken}`
     }
   }).then(r => r.json()).then(data => {
     if (!data.username) {
