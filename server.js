@@ -56,7 +56,7 @@ app.get('/jsFile.js', (req, res) => {
     method: req.method,
     time: date.toTimeString()
   })
-  res.set('Cache-Control', 'max-age=5')
+  res.set('Cache-Control', 'max-age=50')
   res.send('console.log(\'hello zach\')')
 })
 
