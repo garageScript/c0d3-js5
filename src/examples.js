@@ -28,56 +28,7 @@ const getCookieValue = (cookie = '', key) => {
 */
 
 router.get('/dnd', (req, res) => {
-  res.send(`
-  <style>
-.container {
-  position: fixed; top: 0; bottom: 0; left: 0; right: 0;
-}
-.container.dropping {
-  background-color: #8f8;
-}
-  </style>
-<div class="container"></div>
-<script>
-const container = document.querySelector('.container')
-console.log('container', container)
-const makeGreen = (e) => {
-  container.classList.add('dropping')
-  container.innerHTML = "<h1>Will upload " + e.dataTransfer.items.length + " Files</h1>"
-  e.preventDefault()
-}
-const clearScreen = (e) => {
-  container.classList.remove('dropping')
-  container.innerHTML = ""
-  e.preventDefault()
-  return false
-}
-console.log('container', container)
-document.body.addEventListener('dragover', makeGreen)
-document.body.addEventListener('dragleave', clearScreen)
-
-document.body.addEventListener('drop', (e) => {
-  e.preventDefault()
-  const files = Array.from(e.target.files || e.dataTransfer.files)
-  // No files
-  if (!files.length) {
-    return
-  }
-
-  const formData = new FormData()
-  files.forEach( file => {
-    formData.append('assets[]', file, file.name)
-  })
-  fetch('/assetExercise/api/assets', {
-    method: 'POST',
-    body: formData
-  }).then( r => r.json() ).then(arr => {
-    window.location.reload()
-  })
-  return clearScreen(e)
-})
-</script>
-  `)
+  res.sendFile(path.resolve(__dirname, '../views/dnd.html'))
 })
 
 const noteFile = './notes'
