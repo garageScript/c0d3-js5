@@ -12,7 +12,7 @@ router.post('/', (req, res) => {
     'git',
     'cat'
   ]
-  console.log('command is: ', command)
+  req.log('command is: ', command)
   if (!allowed.includes(argList[0]) || argList.length > 2) {
     return res.json({ output: 'command not allowed' })
   }

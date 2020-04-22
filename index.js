@@ -1,8 +1,9 @@
 const { startServer } = require('./server')
+const logger = require('./src/log')(__filename)
 
 const port = process.env.PORT || 3020
 startServer(port).then(() => {
-  console.log('server started on port', port)
+  logger.log('server started on port', port)
 }).catch(err => {
-  console.error('There has been an error', err)
+  logger.error('There has been an error', err)
 })

@@ -19,6 +19,9 @@ router.use('/api/*', (req, res, next) => {
     }
     req.user = data
     next()
+  }).catch(err => {
+    req.error(err)
+    return res.status(500).json({ error: { message: 'Please message gnos on chat' } })
   })
 })
 

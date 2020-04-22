@@ -1,5 +1,6 @@
 const express = require('express')
 const session = require('express-session')
+const { uuid } = require('uuidv4')
 const locationRoute = require('./src/location')
 const authRoute = require('./src/auth')
 const commandRoute = require('./src/command')
@@ -10,8 +11,10 @@ const abtestRoute = require('./src/abtest')
 const todoListRoute = require('./src/todoList')
 const imggen = require('./src/imagegen')
 const exampleRoute = require('./src/examples')
-const app = express()
 const assetExercise = require('./src/assetExercise')
+const logGen = require('./src/log')
+const logger = logGen(__filename)
+const app = express()
 
 app.set('trust proxy', true)
 app.use(express.static('public'))
@@ -32,6 +35,15 @@ app.use(session({
   cookie: { sameSite: 'none', secure: true, maxAge: FIVE_MINUTES }
 }))
 
+app.use((req, res, next) => {
+  const sid = uuid()
+  const reqLogger = logGen(null, sid)
+  req.log = reqLogger.log
+  req.warn = reqLogger.warn
+  req.error = reqLogger.error
+  res.set('c0d3-debug-id', sid)
+  next()
+})
 app.use('/assetExercise', assetExercise)
 app.use('/location', locationRoute)
 app.use('/auth', authRoute)
