@@ -2,12 +2,14 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const multer = require('multer')
+const logger = require('./log')(__dirname)
 
 const router = express.Router()
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, '../public/assetExercise/'),
+  destination: path.join(__dirname, '../userUploads/assets/'),
   filename: function (_, file, cb) {
+    logger.log('renaming file if needed', file.originalname)
     cb(null, `${file.originalname.replace(/ /g, '-')}`)
   }
 })
@@ -36,7 +38,7 @@ router.post('/api/assets', upload.any('assets'), function (req, res) {
       name: f.filename
     }
   })
-
+  req.log('uploaded files, sending back response', fileListResponse)
   res.json(fileListResponse)
 })
 

@@ -12,7 +12,7 @@
 </style>
 <div class="container"><h1>Drag Files Here</h1></div>
 <script>
-  const container = document.querySelector('.container')
+const container = document.querySelector('.container')
 const makeGreen = (e) => {
   container.classList.add('dropping')
   container.innerHTML = "<h1>Will upload " + e.dataTransfer.items.length + " Files</h1>"
