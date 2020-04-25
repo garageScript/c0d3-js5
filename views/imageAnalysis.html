@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/andybrewer/mvp/mvp.css">
+<style>
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed; top: 0; bottom: 0; left: 0; right: 0;
+}
+h1{
+  width: 50%;
+  text-align: center;
+}
+.container.dropping {
+  background-color: #8f8;
+}
+</style>
+<div class="container"><h1>Drag Files Here</h1></div>
+<script>
+const container = document.querySelector('.container')
+const makeGreen = (e) => {
+  container.classList.add('dropping')
+  container.innerHTML = "<h1>Will upload " + e.dataTransfer.items.length + " Files</h1>"
+  e.preventDefault()
+}
+const clearScreen = (e) => {
+  container.classList.remove('dropping')
+  container.innerHTML = "<h1>Drag Files Here</h1>"
+  e.preventDefault()
+  return false
+}
+document.body.addEventListener('dragover', makeGreen)
+document.body.addEventListener('dragleave', clearScreen)
+
+document.body.addEventListener('drop', (e) => {
+  e.preventDefault()
+  const files = Array.from(e.target.files || e.dataTransfer.files)
+  // No files
+  if (!files.length) {
+    return
+  }
+
+  const formData = new FormData()
+  files.forEach( file => {
+    formData.append('assets[]', file, file.name)
+  })
+  fetch('/imageAnalysis/api/assets', {
+    method: 'POST',
+    body: formData
+  }).then( r => r.json() ).then(job => {
+    container.querySelector('h1').innerHTML = `
+    <a href="${job.url}" target="__blank" rel="noopener noreferrer">${job.url}</a>
+    `
+  })
+})
+</script>
