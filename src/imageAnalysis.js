@@ -2,7 +2,7 @@ const express = require('express')
 const { uuid } = require('uuidv4')
 const path = require('path')
 const multer = require('multer')
-const logger = require('./log')(__dirname)
+const logger = require('./log')(__filename)
 const Tesseract = require('tesseract.js')
 
 const router = express.Router()
