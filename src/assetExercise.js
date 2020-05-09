@@ -17,6 +17,7 @@ const upload = multer({ storage })
 
 const assetPath = 'userUploads/assetExercise'
 router.use('/userUploads', express.static(path.join(__dirname, `../${assetPath}`)))
+router.use('/userAssets', express.static(path.join(__dirname, '../userUploads/assets/')))
 
 // define the home page route
 router.get('/', function (req, res) {
