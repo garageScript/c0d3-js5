@@ -100,7 +100,9 @@ Promise.all([getFiles(), getMappings()]).then(([files, mappings]) => {
   routeList$.innerHTML = Object.entries(mappings).reduce((acc, map) => {
     return acc + `
      <aside class='route-container'>
+     <a href="${map[0]}">
        ${map[0]}
+     </a>
        <small>
         ${map[1].fileName}
        </small>
