@@ -1,0 +1,112 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/andybrewer/mvp/mvp.css">
+<style>
+#lambdas__form {
+  display: flex;
+}
+#lambdas__form .info{
+  margin-left: 30px;
+}
+</style>
+
+<main>
+<h1>LAMBDAS</h1>
+
+<h2>
+  Quick Links:
+</h2>
+
+<h2>
+  Define your route to /lambdas/*
+</h2>
+<form id="lambdas__form">
+  <div class="input__container">
+    <label for="route-input">Route Path</label>
+    <div>
+    /<input type="text" id="route-input" style="display:inline-block" placeholder="water">
+    </div>
+    <label for="file-selection">File Selection</label>
+    <select id="file-selection"></select>
+    <label for="method-selection">Request Method</label>
+    <select id="method-selection" value="*">
+      <option value="get">GET</option>
+      <option value="post">POST</option>
+      <option value="put">PUT</option>
+      <option value="patch">PATCH</option>
+      <option value="delete">DELETE</option>
+      <option value="*">*</option>
+    </select>
+    <button class="file-upload__button">Submit</button>
+  </div>
+  <div class="info">
+  <h4>
+    <a href="/examples/dnd">Upload Lambda Files</a>
+  </h4>
+  <p>Your files must have a .js extension</p>
+  <p>File must export a function that takes in req, res, and next object</p>
+  <pre><code>
+  module.exports = (req, res) => {
+    res.send(`&lt;h1&gt; Hello ${req.query.name} &lt;/h1&gt;`)
+  }
+  </code></pre>
+  </div>
+
+</form>
+
+<hr>
+
+<div class="route-list__container"></div>
+
+<script>
+  const getFiles = () => {
+    return fetch('/lambdas/api/files').then( r => r.json())
+  }
+
+  const getMappings = () => {
+    return fetch('/lambdas/api/mappings').then( r => r.json())
+  }
+
+const fSelection$ = document.querySelector('#file-selection')
+const routeInput$ = document.querySelector('#route-input')
+const fileOption$ = document.querySelector('#file-selection')
+const fSubmit$ = document.querySelector('.file-upload__button')
+const routeList$ = document.querySelector('.route-list__container')
+const methodOption$ = document.querySelector('#method-selection')
+fSubmit$.addEventListener('click', (e) => {
+  e.preventDefault()
+  const route = routeInput$.value || 'water'
+  const file = fileOption$.value
+  const method = methodOption$.value
+  fetch('/lambdas/api/mappings', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      route, file, method
+    })
+  }).then( () => {
+    window.location.reload()
+  })
+})
+
+Promise.all([getFiles(), getMappings()]).then(([files, mappings]) => {
+  fSelection$.innerHTML = files.reduce( (acc, f) => {
+    return acc + `
+    <option value="${f}">${f}</option>
+    `
+  }, '')
+  console.log('files', files)
+  console.log('mappings', mappings)
+  routeList$.innerHTML = Object.entries(mappings).reduce((acc, map) => {
+    return acc + `
+     <aside class='route-container'>
+       ${map[0]}
+       <small>
+        ${map[1].fileName}
+       </small>
+     </aside>
+    `
+  }, '<section>') + '</section>'
+})
+
+</script>
