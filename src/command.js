@@ -10,6 +10,7 @@ router.post('/', (req, res) => {
     'cd',
     'touch',
     'git',
+    'pwd',
     'cat'
   ]
   req.log('command is: ', command)
