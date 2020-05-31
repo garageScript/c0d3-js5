@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pokemon Search</title>
+  <link rel="stylesheet" href="https://fonts.xz.style/serve/inter.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@exampledev/new.css@1.1.2/new.min.css">
+  <style>
+.match {
+  background-color: rgba(0, 255, 0, 0.3);
+}
+.suggestions h3 {
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+  <h1>Pokemon Search</h1>
+
+  <input class="searchBox" type="text">
+  <div class="suggestions"></div>
+  
+  <hr>
+  
+  <div class="selectedSection"></div>
+  <script>
+const debounce = (fn, time) => {
+  let timeout;
+  return () => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      fn()
+    }, time)
+  }
+}
+
+const sendQuery = (query) => {
+  return fetch("https://js5.c0d3.com/js6ex1/graphql", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      operationName: null,
+      variables: {},
+      query
+    }),
+  }).then(r => r.json()).then(r => r.data)
+}
+
+const loadSelection = (name) => {
+  selection.innerHTML = ''
+  sendQuery(`{getPokemon(str:"${name}"){name, image}}`).then(result => {
+    selection.innerHTML = `
+    <h1>${result.getPokemon.name}</h1>
+    <img src=${result.getPokemon.image} />
+    `
+  })
+}
+
+function Result(container, name) {
+  const newStr = name.replace(searchBox.value, `<span class='match'>${searchBox.value}</span>`)
+  const element = document.createElement('h3')
+  element.innerHTML = newStr
+  container.append(element)
+  element.addEventListener('click', () => {
+    loadSelection(name)
+  })
+}
+
+const runSearch = debounce(() => {
+  selection.innerHTML = ''
+  sendQuery(`{search(str: "${searchBox.value}") {name}}`).then(data => {
+    const results = data.search || []
+    suggestions.innerHTML = ''
+    results.forEach((e) => {
+      new Result(suggestions, e.name)
+    })
+  })
+}, 500)
+
+const searchBox = document.querySelector('.searchBox')
+const suggestions = document.querySelector('.suggestions')
+const selection = document.querySelector('.selectedSection')
+searchBox.addEventListener('keyup', (e) => {
+  if (e.key === 'Enter') {
+    suggestions.innerHTML = ''
+    return loadSelection(searchBox.value)
+  }
+  runSearch()
+})
+searchBox.focus()
+  </script>
+</body>
+</html>

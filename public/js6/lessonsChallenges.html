@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lessons and Challenges</title>
+  <style>
+body {
+  margin-left: 50px;
+}
+h1 {
+  cursor: pointer;
+}
+
+.challenges {
+  margin-left: 100px;
+}
+  </style>
+</head>
+<body>
+  <div class="container"></div>
+  <script>
+    const container=document.querySelector('.container')
+    
+
+    function Lesson (title, challenges) {
+      let displayed = false
+      const challengesStr = challenges.reduce((acc, e) => {
+        return acc + `
+        <h3> ${e.title} </h3>
+        `
+      }, '')
+      const doc = document.createElement('div')
+      doc.innerHTML = `
+      <h1> ${title} </h1>
+      `
+
+      doc.addEventListener('click', () => {
+        if (displayed) {
+          doc.innerHTML = `
+          <h1> ${title} </h1>
+          `
+        } else {
+          console.log(challenges)
+          doc.innerHTML = `
+          <h1> ${title} </h1>
+          <div class="challenges">
+          ${challengesStr}
+          </div>
+          `
+        }
+        displayed = !displayed
+      })
+      container.append(doc)
+    }
+
+fetch("https://songv2.c0d3.com/api/graphql", {
+    "credentials": "omit",
+    "headers": {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:76.0) Gecko/20100101 Firefox/76.0",
+            "Accept": "*/*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "content-type": "application/json"
+        },
+    "referrer": "https://songv2.c0d3.com/api/graphql",
+  "body": "{\"operationName\":null,\"variables\":{},\"query\":\"{\\n  lessons {\\n    title\\n  challenges {title}}\\n}\\n\"}",
+    "method": "POST",
+    "mode": "cors"
+}).then(r => r.json()).then(result => {
+  result.data.lessons.forEach( l => {
+    new Lesson(l.title, l.challenges)
+  })
+})
+
+  </script>
+</body>
+</html>
