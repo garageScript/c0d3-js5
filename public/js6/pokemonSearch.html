@@ -44,7 +44,7 @@ const sendQuery = (query) => {
   }).then(r => r.json()).then(r => r.data)
 }
 
-const startApp = () => {
+const renderLogin = () => {
   document.querySelector('.app').innerHTML = `
   <h1>Pokemon Search</h1>
 
@@ -65,11 +65,7 @@ const startApp = () => {
       selection.innerHTML = `
     <h1>${result.getPokemon.name}</h1>
     <img src=${result.getPokemon.image} />
-    <button class="continue">Login</button>
     `
-    })
-    selection.querySelector('.continue').addEventListener('click', () => {
-      // login then refresh
     })
   }
 
@@ -79,6 +75,7 @@ const startApp = () => {
     element.innerHTML = newStr
     container.append(element)
     element.addEventListener('click', () => {
+      container.innerHTML = ''
       loadSelection(name)
     })
   }
@@ -103,7 +100,8 @@ const startApp = () => {
   })
   searchBox.focus()
 }
-startApp()
+
+renderLogin()
   </script>
 </body>
 </html>
