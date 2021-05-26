@@ -6,6 +6,13 @@ const logger = require('./log')(__dirname)
 
 const router = express.Router()
 
+const getSafeName = (name) => (/^\w+\.?\w+$/.test(name) ? name : null)
+
+const sendUnsafeNameErrorResponse = (res, name) =>
+  res.status(400).json({
+    error: `Name: ${name} REJECTED! Name can only contain alphanumeric, underscore and one period (for extension name)`,
+  })
+
 const storage = multer.diskStorage({
   destination: path.join(__dirname, '../userUploads/assets/'),
   filename: function (_, file, cb) {
@@ -29,7 +36,10 @@ router.get('/simple', function (req, res) {
 })
 
 router.post('/api/files', function (req, res) {
-  fs.writeFile(path.join(__dirname, `../${assetPath}/${req.body.name}`), req.body.content, () => {})
+  const safeName = getSafeName(req.body.name)
+  if (!safeName) return sendUnsafeNameErrorResponse(res, req.body.name)
+
+  fs.writeFile(path.join(__dirname, `../${assetPath}/${safeName}`), req.body.content, () => {})
   res.json(req.body)
 })
 
@@ -53,13 +63,16 @@ router.get('/api/files', function (req, res) {
 })
 
 router.get('/api/files/:name', function (req, res) {
-  fs.readFile(path.join(__dirname, `../${assetPath}/${req.params.name}`), (err, fileContent) => {
-    if (err) {
-      res.status(500).json(err)
-    }
+  const safeName = getSafeName(req.params.name)
+  if (!safeName) return sendUnsafeNameErrorResponse(res, req.params.name)
+
+  fs.readFile(path.join(__dirname, `../${assetPath}/${safeName}`), (err, fileContent) => {
+
+    if (err) return res.status(500).json(err)
+
     const content = (fileContent && fileContent.toString()) || ''
     res.json({
-      name: req.params.name,
+      name: safeName,
       content
     })
   })
