@@ -25,6 +25,17 @@ router.post('/', (req, res) => {
   if (!allowed.includes(argList[0]) || !safe.test(command)) {
     return res.json({ output: 'command not allowed' })
   }
+  const wordBeginWithPeriodOrSlashPeriod = /(^\.\w+)|(\/\.\w+)/g
+  const hyphenWithA = /^-?-\w*[aA]+/g
+  if (
+    // Don't allow viewing contents of private folders/files
+    (argList[0] === 'cat' && argList.some((arg) => wordBeginWithPeriodOrSlashPeriod.test(arg))) ||
+    // Disable ls -All parameter (in all it's forms) to prevent navigating private folders
+    (argList[0] === 'ls' && argList.some((arg) => hyphenWithA.test(arg)))
+  ) {
+    return res.json({ output: 'Error: hidden files are private' })
+  }
+
   execFile(argList[0], argList.slice(1), (err, stdout) => {
     if (err) {
       return res.json({ output: 'error' })
