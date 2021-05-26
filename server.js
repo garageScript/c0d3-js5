@@ -109,6 +109,7 @@ const stopServer = () => {
 };
 
 module.exports = {
+  app,
   startServer,
   stopServer,
 };
