@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { getUser } = require("./userlist");
+const { JWT_PRIVATE_SECRET } = require('./fakeEnv')
 const middlewares = {};
 
 middlewares.setUser = (req, res, next) => {
@@ -7,11 +8,14 @@ middlewares.setUser = (req, res, next) => {
     req.user = getUser(req.session.username);
   }
 
-  const authToken = (req.headers.authorization || "").split(" ");
+  const authToken = (req.headers.authorization || '').split(' ').pop();
   if (authToken) {
-    const data = jwt.decode(authToken.pop()) || {};
-    if (data.username) {
-      req.user = getUser(data.username);
+    try {
+      // will throw error if invalid token
+      const data = jwt.verify(authToken,JWT_PRIVATE_SECRET)
+      req.user = getUser(data.username)
+    } catch (error) {
+      // Invalid authToken, don't set user and continue
     }
   }
 
