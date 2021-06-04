@@ -1,18 +1,13 @@
-/* globals afterAll beforeAll describe it jest expect */
+/* globals describe it jest expect */
 const { app } = require('../server')
 const request = require('supertest')
 const jwt = require('jsonwebtoken')
+const { saveUser } = require('./lib/userlist')
+const { JWT_PRIVATE_SECRET } = require('./lib/fakeEnv')
 
-// Prevent actual db writes/reads and seed mock user
+// Prevent actual db writes/reads
 jest.mock('./lib/db', () => ({
-  getData: jest.fn().mockResolvedValue({
-    mockUser: {
-      username: 'mockUser',
-      email: 'mock@mock',
-      jwt: 'mockJwt',
-      id: 'whoCares'
-    }
-  }),
+  getData: jest.fn().mockResolvedValue({}),
   setData: jest.fn().mockReturnValue(null)
 }))
 
@@ -22,18 +17,6 @@ describe('auth (js5/p6)', () => {
   const validResponse = expect.objectContaining({
     ...mockUser,
     jwt: expect.any(String)
-  })
-
-  beforeAll(() => {
-    jest.spyOn(jwt, 'verify').mockImplementation((jwt) => {
-      if (jwt === mockUser.jwt) return mockUser
-      throw Error('BAD JWT')
-    })
-    jest.spyOn(jwt, 'decode').mockReturnValue(mockUser)
-  })
-
-  afterAll(() => {
-    jest.restoreAllMocks()
   })
 
   it('creating a new user return a jwt', async () => {
@@ -50,15 +33,19 @@ describe('auth (js5/p6)', () => {
     )
   })
   it('can get session with jwt', async () => {
+    const token = jwt.sign({ username: mockUser.username }, JWT_PRIVATE_SECRET)
+    saveUser({ ...mockUser, jwt: token })
     const response = await request(app)
       .get('/auth/api/session')
-      .set('Authorization', `Bearer ${'mockJwt'}`)
+      .set('Authorization', `Bearer ${token}`)
     expect(response.body).toEqual(validResponse)
   })
   it('should not return session with fake jwt', async () => {
+    const badToken = jwt.sign({ username: mockUser.username }, 'bad_key')
+    saveUser({ ...mockUser, jwt: badToken })
     const response = await request(app)
       .get('/auth/api/session')
-      .set('Authorization', `Bearer ${'BAD_JWT'}`)
+      .set('Authorization', `Bearer ${badToken}`)
 
     expect(response.body).not.toEqual(validResponse)
   })
