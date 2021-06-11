@@ -1,0 +1,20 @@
+name: 'Deploy to Caprover'
+
+on:
+  push:
+    branches: [ prod ]
+  workflow_dispatch:
+
+jobs:
+  caprover-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Deploy to Caprover
+        uses: JasirZaeem/caprover-deploy@v1
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          server: ${{secrets.CAPROVER_URL}}
+          password: ${{secrets.CAPROVER_PASSWORD}}
+          app: "js5"
