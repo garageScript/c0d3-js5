@@ -6,7 +6,7 @@ const { setUser, cors } = require('./lib/middleware')
 const { saveUser, getUser, getUserByEmail, getAllUsers } = require('./lib/userlist')
 const router = express.Router()
 
-const privateSecret = 'reallygreatc0der'
+const privateSecret = require('./lib/fakeEnv').JWT_PRIVATE_SECRET
 
 // For CORS. Must be placed at the top so this handles
 // cors request first before propagating to other middlewares
