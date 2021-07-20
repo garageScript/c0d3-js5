@@ -55,7 +55,9 @@ type Query {
         })
       }
     }
-  }
+  },
+  introspection: true,
+  playground: true
 })
 
 server.applyMiddleware({ app: router })
