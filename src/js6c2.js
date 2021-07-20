@@ -122,7 +122,9 @@ type Mutation {
   },
   context: ({ req }) => {
     return { req }
-  }
+  },
+  introspection: true,
+  playground: true
 })
 
 server.applyMiddleware({ app: router })
