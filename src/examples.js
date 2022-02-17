@@ -3,8 +3,26 @@ const fs = require('fs')
 const path = require('path')
 const { uuid } = require('uuidv4')
 const router = express.Router()
+const fsP = fs.promises
 
 const uploadPath = 'userUploads/webcam'
+const parentPath = 'examples'
+
+const getAllWebcamImages = () => fsP.readdir(path.resolve(__dirname, `../${uploadPath}`))
+const pathToUrl = (req, dir) => `https://${req.headers.host}/${dir}`
+
+router.get(`/${uploadPath}`, async (req, res) => {
+  const webcamImages = await getAllWebcamImages()
+
+  const mapWebcamImagesToUrl = webcamImages.reduce((acc, imageName) => {
+    // Skip the placeholder
+    if (!imageName.includes('README')) acc.push(pathToUrl(req, `${parentPath}/${uploadPath}/${imageName}`))
+
+    return acc
+  }, [])
+
+  return res.send({ links: mapWebcamImagesToUrl })
+})
 router.use(`/${uploadPath}`, express.static(path.resolve(__dirname, `../${uploadPath}`)))
 
 router.options('/api/*', (req, res) => {
@@ -76,7 +94,7 @@ router.get('/notes/add', (req, res) => {
   }
   notes.unshift(content)
   notes = notes.splice(0, 5)
-  fs.writeFile(noteFile, JSON.stringify(notes), () => {})
+  fs.writeFile(noteFile, JSON.stringify(notes), () => { })
   res.json(notes)
 })
 
