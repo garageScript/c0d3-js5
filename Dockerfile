@@ -1,7 +1,7 @@
 FROM node:14-alpine
-RUN apk update && apk upgrade && \
+RUN apk update && apk upgrade && apk add python3 && \
     apk add --no-cache git
-RUN apk add g++ make python
+RUN apk add g++ make python3
 
 WORKDIR /usr/src/app
 
