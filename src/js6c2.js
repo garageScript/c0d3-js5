@@ -123,20 +123,21 @@ type Mutation {
       }
     }
   },
-  context: ({ req }) => {
-    return { req }
-  },
-  introspection: true,
-  playground: true
+  introspection: true
 })
 
 server.start().then(() => {
   router.use(
     '/graphql',
-    cors(),
+    cors(
+      {
+        credentials: true,
+        origin: true
+      }
+    ),
     json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token })
+      context: async ({ req }) => ({ req })
     })
   )
 })
