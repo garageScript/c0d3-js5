@@ -59,8 +59,7 @@ type Query {
       }
     }
   },
-  introspection: true,
-  playground: true
+  introspection: true
 })
 
 server.start().then(() => {
@@ -69,7 +68,7 @@ server.start().then(() => {
     cors(),
     json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.token })
+      context: async ({ req }) => ({ req })
     })
   )
 })
