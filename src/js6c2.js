@@ -1,6 +1,9 @@
 const express = require('express')
 const fetch = require('node-fetch')
-const { ApolloServer, gql } = require('apollo-server-express')
+const { ApolloServer } = require('@apollo/server')
+const { expressMiddleware } = require('@apollo/server/express4')
+const cors = require('cors')
+const { json } = require('body-parser')
 
 const router = express.Router()
 
@@ -14,7 +17,7 @@ fetch(`https://pokeapi.co/api/v2/pokemon?limit=${2000}`).then(r => r.json()).the
 const allUsers = {}
 
 const server = new ApolloServer({
-  typeDefs: gql(`
+  typeDefs: `
 type Lesson {
   title: String
 }
@@ -41,7 +44,7 @@ type Mutation {
   enroll(title: String!): User
   unenroll(title: String!): User
 }
-  `),
+  `,
   resolvers: {
     Query: {
       lessons: () => {
@@ -127,6 +130,15 @@ type Mutation {
   playground: true
 })
 
-server.applyMiddleware({ app: router })
+server.start().then(() => {
+  router.use(
+    '/graphql',
+    cors(),
+    json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => ({ token: req.headers.token })
+    })
+  )
+})
 
 module.exports = router
