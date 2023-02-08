@@ -90,7 +90,7 @@ type Mutation {
           const data = {
             name: poke.name,
             image: poke.sprites.front_default,
-            lessons: {}
+            lessons: []
           }
           allUsers[args.pokemon] = data
           return { ...data, lessons: [] }
